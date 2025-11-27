@@ -739,15 +739,21 @@ function checkRespiration(uI,clickedButton){
     aa.classList.remove('hidden');
     const sB=cp.airwayResponse;
     if(sB){
-    aa.classList.remove('bg-red-100','text-red-700');aa.classList.add('bg-green-100','text-green-700');
-    ame.innerHTML=`<span class="text-green-800 font-bold">Result: Breathing Started (RED).</span>`;
-    amz.innerHTML=`<span class="text-green-800">結果：開始呼吸 (紅色)！</span>`; // 修正：確保只包含中文，且不帶額外的 font-bold
+        // Breathing started
+        aa.classList.remove('bg-red-100','text-red-700');aa.classList.add('bg-green-100','text-green-700');
+        ame.innerHTML=`<span class="text-green-800 font-bold">Result: Breathing started after opening airway.</span>`;
+        amz.innerHTML=`<span class="text-green-800">結果：暢通氣道後開始呼吸。</span>`; 
     }else{
-    aa.classList.add('bg-red-100','text-red-700');aa.classList.remove('bg-green-100','text-green-700');
-    ame.innerHTML=`<span class="text-red-800 font-bold">Result: Still Absent (BLACK).</span>`;
-    amz.innerHTML=`<span class="text-red-800">結果：仍無呼吸 (黑色)。</span>`; // 修正：確保只包含中文，且不帶額外的 font-bold
+        // Still absent
+        aa.classList.add('bg-red-100','text-red-700');aa.classList.remove('bg-green-100','text-green-700');
+        ame.innerHTML=`<span class="text-red-800 font-bold">Result: Still no breathing after opening airway.</span>`;
+        amz.innerHTML=`<span class="text-red-800">結果：暢通氣道後仍無呼吸。</span>`; 
     }
-    tfc();
+    
+    // *** 修正邏輯：這裡不再呼叫 tfc()，而是直接顯示最終分類選項 ***
+    st.finalChoice.classList.remove('hidden'); // 顯式顯示最終分類區塊
+    st.finalChoice.scrollIntoView({behavior: 'smooth', block: 'start'}); // 滾動以便使用者看到
+    
     cPT=true;
     }
     }else if(uI>30){
@@ -964,3 +970,20 @@ window.resetGame = resetGame; // 暴露新的重置函式
 
 </body>
 </html>
+window.Triage = tg;
+window.setDifficulty = setDifficulty;
+window.startNewIncident = si;
+window.nextPatient = nP;
+window.checkAmbulatory = checkAmbulatory;
+window.checkRespiration = checkRespiration;
+window.checkPerfusion = checkPerfusion;
+window.checkMental = checkMental;
+window.finalizeTriage = ft;
+window.resetGame = resetGame; // 暴露新的重置函式
+
+})();
+</script>
+
+</body>
+</html>
+
