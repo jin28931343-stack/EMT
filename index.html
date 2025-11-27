@@ -709,22 +709,27 @@ function checkAmbulatory(cWR,clickedButton){
     
     if(cWR){
         if(cp.canWalk){
-        ft(tg.GREEN);return;
+            ft(tg.GREEN);return;
         }else{
-        tfc();return;
+            // 錯誤提示：傷患其實不能走，但使用者選了能走
+            alert("Incorrect! Patient cannot walk."); 
+            tfc();return;
         }
     }
+    
     if(cWR===false){
         if(!cp.canWalk){
-        // 無法走動，進入 R (Respiration) 步驟
-        
-        // 顯示 R 數值容器
-        rc.classList.remove('hidden');
-
-        st.respiration.classList.remove('hidden');
-        return;
+            // 正確：傷患不能走，顯示呼吸評估
+            rc.classList.remove('hidden');
+            st.respiration.classList.remove('hidden');
+            // *** 修正：確保滾動到呼吸評估區塊 ***
+            st.respiration.scrollIntoView({behavior: 'smooth', block: 'start'});
+            return;
         }else{
-        tfc();return;
+            // 錯誤提示：傷患其實能走（綠色），但使用者選了不能走
+            // 這解釋了為什麼會直接跳到最終分類（因為第一步就錯了）
+            alert("觀察錯誤：傷患其實是可以走動的 (綠色)。\nObservation Error: Patient is able to walk.");
+            tfc();return;
         }
     }
 }
@@ -755,11 +760,24 @@ function checkRespiration(uI,clickedButton){
     st.finalChoice.scrollIntoView({behavior: 'smooth', block: 'start'}); // 滾動以便使用者看到
     
     cPT=true;
+    }else{
+        // 錯誤：使用者選了無呼吸，但其實有呼吸
+        alert("觀察錯誤：傷患有呼吸。\nObservation Error: Patient is breathing.");
+        tfc();
+        return;
     }
     }else if(uI>30){
     if(cp.respRate>30){
-    tfc();
-    cPT=true;
+        // 正確：呼吸過快，直接跳轉到最終分類 (紅色)
+        // 顯示最終分類區塊，但不隱藏之前的 (保留上下文)
+        st.finalChoice.classList.remove('hidden');
+        st.finalChoice.scrollIntoView({behavior: 'smooth', block: 'start'});
+        cPT=true;
+    }else{
+        // 錯誤：呼吸其實不快
+        alert("觀察錯誤：呼吸速率並非 > 30。\nObservation Error: Respiration rate is not > 30.");
+        tfc();
+        return;
     }
     }else{
     if(cp.respRate>=10&&cp.respRate<=30){
@@ -770,10 +788,18 @@ function checkRespiration(uI,clickedButton){
     pC.classList.remove('hidden'); // 顯示 P 數值
     
     st.perfusion.classList.remove('hidden');
+    // *** 修正：確保滾動到灌流評估區塊 ***
+    st.perfusion.scrollIntoView({behavior: 'smooth', block: 'start'});
     cPT=true;
+    }else{
+        // 錯誤：呼吸其實異常
+        alert("觀察錯誤：呼吸速率異常。\nObservation Error: Abnormal respiration rate.");
+        tfc();
+        return;
     }
     }
-    if(!cPT){tfc();}
+    // 如果正確進入了終止或下一步，cPT 為 true。
+    // 如果邏輯上有漏洞（不應該發生），或需要強制結束。
 }
 
 function checkPerfusion(pAOCLR,clickedButton){
@@ -781,15 +807,31 @@ function checkPerfusion(pAOCLR,clickedButton){
     st.perfusion.classList.add('hidden');
     if(cp.pulsePresent===!pAOCLR){
         if(pAOCLR){
-        tfc();
+            // 灌流異常 (CRT > 2s) -> 直接最終分類 (紅色)
+            // 顯示最終分類，不隱藏之前的
+            st.perfusion.classList.remove('hidden'); // 保持 P 顯示 (因為我們要顯示最終分類在下面)
+            // Wait, standard behavior for next steps is to hide previous.
+            // But for "Terminal" steps (Red/Black), we usually hide.
+            // Let's just show final choice.
+            st.perfusion.classList.add('hidden'); // Hide P buttons to clean up? Or keep them?
+            // Let's keep P visible for context? No, consistency.
+            // Actually, if we jump to final, better to show why.
+            // Reverting to: Hide P buttons, Show Final Choice.
+            
+            st.finalChoice.classList.remove('hidden');
+            st.finalChoice.scrollIntoView({behavior: 'smooth', block: 'start'});
         }else{
         // 進入 M (Mental) 步驟
         pC.classList.add('hidden'); // 隱藏 P 數值
         mC.classList.remove('hidden'); // 顯示 M 數值
         
         st.mental.classList.remove('hidden');
+        // *** 修正：確保滾動到意識評估區塊 ***
+        st.mental.scrollIntoView({behavior: 'smooth', block: 'start'});
         }
     }else{
+        // 錯誤
+        alert("觀察錯誤：灌流評估不正確。\nObservation Error: Incorrect perfusion assessment.");
         tfc();
     }
 }
@@ -970,20 +1012,3 @@ window.resetGame = resetGame; // 暴露新的重置函式
 
 </body>
 </html>
-window.Triage = tg;
-window.setDifficulty = setDifficulty;
-window.startNewIncident = si;
-window.nextPatient = nP;
-window.checkAmbulatory = checkAmbulatory;
-window.checkRespiration = checkRespiration;
-window.checkPerfusion = checkPerfusion;
-window.checkMental = checkMental;
-window.finalizeTriage = ft;
-window.resetGame = resetGame; // 暴露新的重置函式
-
-})();
-</script>
-
-</body>
-</html>
-
