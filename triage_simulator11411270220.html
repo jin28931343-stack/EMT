@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>START Triage Simulation | START 檢傷分類模擬</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+TC:wght&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --color-black: #1f2937;
+            --color-red: #ef4444;
+            --color-yellow: #f59e0b;
+            --color-green: #10b981;
+            --color-gray: #4b5563;
+        }
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: var(--color-black);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-size: 16px; 
+            user-select: none; /* CSS: 禁用文字選取 */
+            -webkit-user-select: none; /* For Safari */
+            -moz-user-select: none; /* For Firefox */
+            -ms-user-select: none; /* For IE/Edge */
+            
+            /* --- 預設縮放 48% --- */
+            zoom: 0.48; 
+            -moz-transform: scale(0.48); /* For Firefox compatibility */
+            -moz-transform-origin: top left;
+        }
+        .bilingual-en { font-weight: 700; }
+        /* 修正: 讓中文文字大小與英文更接近，並繼承按鈕顏色 */
+        .bilingual-zh { font-size: 1.05em; color: inherit; } 
+        .triage-card {
+            background-color: #f9fafb;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            max-width: 650px; 
+            width: 100%;
+            padding: 1.5rem; /* 縮減內邊距 */
+            display: flex;
+            flex-direction: column;
+            gap: 1rem; /* 縮減卡片內元素間距 */
+        }
+        .triage-color {
+            font-weight: 900;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-top: 1rem;
+        }
+        .red-bg { background-color: var(--color-red); }
+        .yellow-bg { background-color: var(--color-yellow); color: var(--color-black) !important; }
+        .green-bg { background-color: var(--color-green); }
+        .black-bg { background-color: var(--color-gray); }
+        .stat-box {
+            background-color: #e5e7eb;
+            padding: 1.1rem; 
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 1.25rem; 
+        }
+        .action-button {
+            padding: 0.85rem 1.65rem; 
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            font-weight: 700;
+            /* 保持 font-size: 1.05rem 以確保按鈕內的英文行不會過大 */
+            font-size: 1.05rem; 
+            color: white; 
+            line-height: 1.25; /* 增加行距，讓中文和英文間距更舒適 */
+        }
+        .action-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .action-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        /* 新增：專業模式按鈕的基礎樣式 (無色) */
+        .pro-mode-button {
+            background-color: #f3f4f6 !important; /* 淺灰色背景 */
+            color: var(--color-gray) !important; /* 深灰文字 */
+            border: 2px solid #d1d5db;
+        }
+        .pro-mode-button:hover:not(:disabled) {
+            background-color: #e5e7eb !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        /* 專門針對最終選擇按鈕的顏色保留 */
+        .final-triage-button {
+            color: white !important; /* 確保最終按鈕顏色不受影響 */
+        }
+        .step-heading {
+            font-size: 1.6rem; 
+            font-weight: 700;
+            color: var(--color-gray);
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        /* Custom style for the R-P-M button (Red, Yellow, Black) */
+        .rpm-button {
+            /* Create a gradient from left (Red) to middle (Yellow) to right (Black/Gray) */
+            background: linear-gradient(to right, #ef4444 0%, #ef4444 33%, #f59e0b 33%, #f59e0b 66%, #4b5563 66%, #4b5563 100%);
+            color: white; 
+            text-shadow: 1px 1px 2px #1f2937; /* Add shadow for readability on lighter parts */
+        }
+        .rpm-button:hover:not(:disabled) {
+            /* Keep the same gradient but use a slightly darker hover effect */
+            background: linear-gradient(to right, #dc2626 0%, #dc2626 33%, #d97706 33%, #d97706 66%, #374151 66%, #374151 100%);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;" onselectstart="return false;">
+
+<div class="triage-card">
+    <!-- MODIFIED: Added id="main-title" -->
+    <h1 id="main-title" class="text-3xl font-bold text-center text-gray-900">
+        <span class="bilingual-en">START Triage Simulator</span>
+        <span class="bilingual-zh block mt-1">START 檢傷分類模擬器</span>
+    </h1>
+
+    <!-- 1. 難度選擇區塊 (新增) -->
+    <section id="difficulty-selection" class="flex flex-col gap-4 p-4 rounded-lg border border-gray-200">
+        <h2 class="text-xl font-bold text-gray-700 text-center">
+            <span class="bilingual-en">Select Difficulty</span>
+            <span class="bilingual-zh block">選擇困難度</span>
+        </h2>
+        <div class="grid grid-cols-2 gap-4">
+            <button id="difficulty-beginner" onclick="setDifficulty('beginner', this)" 
+                class="action-button bg-green-600 hover:bg-green-700 shadow-md border-2 border-green-600">
+                <span class="bilingual-en">1. Beginner</span>
+                <span class="bilingual-zh block">初學者</span>
+            </button>
+            <button id="difficulty-pro" onclick="setDifficulty('pro', this)" 
+                class="action-button bg-gray-600 hover:bg-gray-700 shadow-md border-2 border-gray-600">
+                <span class="bilingual-en">2. Professional</span>
+                <span class="bilingual-zh block">專業人員</span>
+            </button>
+        </div>
+        <p id="difficulty-info" class="text-sm text-center text-gray-500">
+            <span class="bilingual-en">Please select a difficulty level to start.</span>
+            <span class="bilingual-zh block">請選擇難度等級以開始。</span>
+        </p>
+    </section>
+
+    <!-- Game Status and Patient Info -->
+    <!-- MODIFIED: Added id="status-container" -->
+    <div id="status-container" class="bg-gray-100 p-4 rounded-lg shadow-inner flex justify-between items-center hidden"> <!-- 預設隱藏，選擇難度後顯示 -->
+        <div id="status-display" class="text-xl font-bold text-gray-800">
+            <span class="bilingual-en">Click "New Incident" to start.</span>
+            <span class="bilingual-zh block mt-1">點擊「新事件」開始。</span>
+        </div>
+        <button id="new-incident-btn" onclick="startNewIncident()" class="action-button bg-blue-600 hover:bg-blue-700 text-white shadow-md" disabled> <!-- 預設禁用 -->
+            <span class="bilingual-en">New Incident</span>
+            <span class="bilingual-zh block">新事件</span>
+        </button>
+    </div>
+
+    <!-- Patient Card -->
+    <div id="patient-card" class="bg-white p-4 rounded-lg border-2 border-gray-200 hidden"> <!-- 內邊距 p-6 改為 p-4 -->
+        
+        <!-- 包含傷患編號和計時器的標題區塊 -->
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-gray-800 flex-shrink-0">
+                <span class="bilingual-en">Patient #</span><span id="patient-number">1</span>
+                <span class="bilingual-zh mt-1 block">傷患編號</span>
+            </h2>
+            
+            <!-- 新增計時器顯示 (右側) -->
+            <div id="triage-timer" class="text-xl font-mono text-red-600 font-extrabold flex-grow text-right">
+                00:00
+            </div>
+
+            <!-- Triage Result (Displayed AFTER final choice) -->
+            <div id="triage-result" class="triage-color red-bg hidden flex-shrink-0">
+                <span class="bilingual-en">RED - Immediate</span>
+                <span class="bilingual-zh block">紅色 - 立即</span>
+            </div>
+        </div>
+        
+        <!-- Patient Context and Vitals Display -->
+        <div class="grid grid-cols-2 gap-4 mb-6 text-gray-700">
+            <div class="stat-box col-span-2 bg-yellow-100 border-l-4 border-yellow-500">
+                <span class="bilingual-en font-bold">CONTEXT: </span>
+                <span id="patient-context"></span>
+            </div>
+            
+            <!-- Walk Test Status -->
+            <div id="walk-status-box" class="stat-box col-span-2 border-l-4 border-blue-500 bg-blue-100">
+                <span class="bilingual-en font-bold">Walk Test (Ambulatory)</span>
+                <span class="bilingual-zh block">走路測試 (活動能力)</span>
+                <span id="walk-test-status" class="block mt-1">N/A</span>
+            </div>
+
+            <!-- Respiration Rate (R) - Now controlled by visibility -->
+            <div id="resp-container" class="stat-box flex flex-col items-center justify-center hidden">
+                <div class="flex items-baseline">
+                    <span class="bilingual-en">Respiration Rate (R): </span><span id="resp-rate" class="font-mono">N/A</span> / min
+                </div>
+                <div id="resp-rate-zh-note" class="text-sm font-normal mt-1 text-gray-500"></div>
+            </div>
+            <!-- Radial Pulse (P) - Now controlled by visibility -->
+            <div id="pulse-container" class="stat-box hidden">
+                <span class="bilingual-en">Radial Pulse (P): </span><span id="pulse-status">N/A</span>
+            </div>
+            <!-- Mental Status (M) - Now controlled by visibility -->
+            <div id="mental-container" class="stat-box col-span-2 hidden">
+                <span class="bilingual-en">Mental Status (M): </span><span id="mental-status-display">N/A</span>
+            </div>
+        </div>
+
+        <!-- Triage Steps -->
+        <div id="triage-steps" class="flex flex-col gap-4"> <!-- 步驟間距 gap-6 改為 gap-4 -->
+
+            <!-- Step 1: Ambulatory (Walk Test) -->
+            <div id="step-ambulatory">
+                <div class="step-heading">1. <span class="bilingual-en">Ambulatory (Walk Test)</span> <span class="bilingual-zh">能走動 (走路測試)</span></div>
+                <div class="flex gap-4">
+                    <button onclick="checkAmbulatory(true, this)" class="action-button bg-green-500 hover:bg-green-600 text-white flex-1">
+                        <span class="bilingual-en">Can Walk</span>
+                        <!-- CLEANED: Using Unicode arrow -->
+                        <span class="bilingual-zh block">能走動 → 立即確認為綠色 (P3)</span>
+                    </button>
+                    <!-- MODIFIED: Changed class to rpm-button for custom gradient style -->
+                    <button onclick="checkAmbulatory(false, this)" class="action-button rpm-button flex-1">
+                        <span class="bilingual-en">Cannot Walk</span>
+                        <!-- CLEANED: Using Unicode arrow -->
+                        <span class="bilingual-zh block">無法走動 → 繼續 R-P-M</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Respiration (R) -->
+            <div id="step-respiration" class="hidden">
+                <div class="step-heading">2. <span class="bilingual-en">Respiration Rate (R)</span> <span class="bilingual-zh">呼吸速率 (R)</span></div>
+                <p class="mb-4 text-gray-600"><span class="bilingual-en">Classify the patient's respiration rate:</span><span class="bilingual-zh">請根據上方速率判斷分類：</span></p>
+                <div class="grid grid-cols-3 gap-4">
+                    <button onclick="checkRespiration(0, this)" class="action-button bg-gray-400 hover:bg-gray-500 text-white">
+                        <span class="bilingual-en">Absent</span>
+                        <!-- CLEANED: Using Unicode arrow -->
+                        <span class="bilingual-zh block">無呼吸 → 暢通氣道</span>
+                    </button>
+                    <button onclick="checkRespiration(35, this)" class="action-button bg-red-500 hover:bg-red-600 text-white">
+                        <span class="bilingual-en">Fast (> 30/min)</span>
+                        <!-- CLEANED: Using Unicode arrow -->
+                        <span class="bilingual-zh block">過快 → 最終確認</span>
+                    </button>
+                    <button onclick="checkRespiration(20, this)" class="action-button bg-green-500 hover:bg-green-600 text-white">
+                        <span class="bilingual-en">Normal (10-30/min)</span>
+                        <!-- CLEANED: Using Unicode arrow -->
+                        <span class="bilingual-zh block">正常 → 繼續 P</span>
+                    </button>
+                </div>
+                <!-- Airway Action Prompt: Now shows automatic result, no buttons -->
+                <div id="airway-action" class="mt-4 p-3 bg-red-100 border-l-4 border-red-500 text-red-700 hidden">
+                    <p class="font-bold"><span class="bilingual-en">Intervention: Open Airway Performed.</span></p>
+                    <span id="airway-message-en" class="bilingual-en block mt-1"></span>
+                    <span id="airway-message-zh" class="bilingual-zh block mt-1"></span>
+                </div>
+            </div>
+
+            <!-- Step 3: Perfusion (P) -->
+            <div id="step-perfusion" class="hidden">
+                <div class="step-heading">3. <span class="bilingual-en">Perfusion Check (P)</span> <span class="bilingual-zh">灌流檢查 (P)</span></div>
+                <p class="mb-4 text-gray-600"><span class="bilingual-en">Assess the Radial Pulse / Capillary Refill Time (CRT):</span><span class="bilingual-zh">請根據橈動脈脈搏或微血管回填時間判斷：</span></p>
+                <div class="flex gap-4">
+                    <button onclick="checkPerfusion(true, this)" class="action-button bg-red-500 hover:bg-red-600 text-white flex-1">
+                        <span class="bilingual-en">Absent Pulse / CRT > 2s</span>
+                        <!-- CLEANED: Using Unicode arrow -->
+                        <span class="bilingual-zh block">無脈搏或 CRT > 2秒 → 最終確認</span>
+                    </button>
+                    <button onclick="checkPerfusion(false, this)" class="action-button bg-green-500 hover:bg-green-600 text-white flex-1">
+                        <span class="bilingual-en">Present Pulse / CRT ≤ 2s</span>
+                        <!-- CLEANED: Using Unicode arrow and <= symbol -->
+                        <span class="bilingual-zh block">有脈搏且 CRT ≤ 2秒 → 繼續 M</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Mental Status (M) -->
+            <div id="step-mental" class="hidden">
+                <div class="step-heading">4. <span class="bilingual-en">Mental Status (M)</span> <span class="bilingual-zh">意識狀態 (M)</span></div>
+                <p class="mb-4 text-gray-600"><span class="bilingual-en">Determine if the patient can follow simple commands:</span><span class="bilingual-zh">判斷傷患是否能遵從簡單指令：</span></p>
+                <div class="flex gap-4">
+                    <button onclick="checkMental(true, this)" class="action-button bg-red-500 hover:bg-red-600 text-white flex-1">
+                        <span class="bilingual-en">Cannot Follow Commands</span>
+                        <!-- CLEANED: Using Unicode arrow -->
+                        <span class="bilingual-zh block">無法遵從指令 → 最終確認</span>
+                    </button>
+                    <button onclick="checkMental(false, this)" class="action-button bg-yellow-500 hover:bg-yellow-600 text-white flex-1">
+                        <span class="bilingual-en">Can Follow Commands</span>
+                        <!-- CLEANED: Using Unicode arrow -->
+                        <span class="bilingual-zh block">可遵從指令 → 最終確認</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 5: Final Triage Choice -->
+            <div id="step-final-choice" class="hidden">
+                <div class="step-heading">5. <span class="bilingual-en">Final Triage Classification</span> <span class="bilingual-zh">最終分類確認</span></div>
+                <p class="mb-4 text-gray-600"><span class="bilingual-en">Based on the R-P-M flow, what is the patient's final category?</span><span class="bilingual-zh">根據 R-P-M 流程，請確認傷患的最終分類：</span></p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button onclick="finalizeTriage(Triage.RED, this)" class="action-button red-bg text-white final-triage-button">
+                        <span class="bilingual-en">RED</span>
+                        <span class="bilingual-zh block">紅色 (立即)</span>
+                    </button>
+                    <button onclick="finalizeTriage(Triage.YELLOW, this)" class="action-button yellow-bg text-gray-900 final-triage-button">
+                        <span class="bilingual-en">YELLOW</span>
+                        <span class="bilingual-zh block">黃色 (延遲)</span>
+                    </button>
+                    <button onclick="finalizeTriage(Triage.GREEN, this)" class="action-button green-bg text-white final-triage-button">
+                        <span class="bilingual-en">GREEN</span>
+                        <span class="bilingual-zh block">綠色 (輕微)</span>
+                    </button>
+                    <button onclick="finalizeTriage(Triage.BLACK, this)" class="action-button black-bg text-white final-triage-button">
+                        <span class="bilingual-en">BLACK</span>
+                        <span class="bilingual-zh block">黑色 (死亡)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Triage Conclusion -->
+            <div id="step-conclusion" class="hidden mt-4">
+                <div class="flex flex-col gap-4">
+                    <div id="final-classification" class="text-2xl font-bold text-gray-800"></div>
+                    <button id="next-patient-btn" onclick="nextPatient()" class="action-button bg-blue-600 hover:bg-blue-700 text-white" disabled>
+                        <span class="bilingual-en">Next Patient</span>
+                        <span class="bilingual-zh block">下一位傷患</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- 2. 事件總結報告區塊 (新增) -->
+    <div id="score-summary" class="bg-white p-6 rounded-xl border-2 border-gray-200 hidden">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">
+            <span class="bilingual-en">Incident Summary Report</span>
+            <span class="bilingual-zh block mt-1">事件總結報告</span>
+        </h2>
+        
+        <!-- 時間統計 -->
+        <div class="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h3 class="text-xl font-semibold text-blue-700 mb-3 border-b border-blue-200 pb-2">
+                <i class="fa-solid fa-clock"></i> <span class="bilingual-en">Time Statistics</span>
+                <span class="bilingual-zh">時間統計</span>
+            </h3>
+            <div class="grid grid-cols-2 gap-4 text-gray-700">
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium"><span class="bilingual-en">Total Triage Time</span><span class="bilingual-zh block">總花費時間</span></span>
+                    <span id="summary-total-time" class="text-2xl font-mono font-extrabold text-blue-800">00:00</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium"><span class="bilingual-en">Average Time Per Patient</span><span class="bilingual-zh block">每位傷患平均時間</span></span>
+                    <span id="summary-avg-time" class="text-2xl font-mono font-extrabold text-blue-800">00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分類與準確度 -->
+        <div class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 class="text-xl font-semibold text-gray-700 mb-3 border-b border-gray-200 pb-2">
+                <i class="fa-solid fa-chart-pie"></i> <span class="bilingual-en">Classification Accuracy</span>
+                <span class="bilingual-zh">分類準確度</span>
+            </h3>
+            <div class="grid grid-cols-2 gap-4 text-gray-700">
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium"><span class="bilingual-en">Total Patients</span><span class="bilingual-zh block">總傷患人數</span></span>
+                    <span id="summary-total-patients" class="text-2xl font-extrabold text-gray-900">15</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium"><span class="bilingual-en">Overall Accuracy</span><span class="bilingual-zh block">總體準確率</span></span>
+                    <span id="summary-overall-accuracy" class="text-2xl font-extrabold text-gray-900">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分類詳細表格 -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 rounded-lg shadow-sm">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <span class="bilingual-en">Category</span><span class="bilingual-zh">分類</span>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <span class="bilingual-en">Total</span><span class="bilingual-zh">總數</span>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <span class="bilingual-en">Correct</span><span class="bilingual-zh">正確</span>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <span class="bilingual-en">Accuracy</span><span class="bilingual-zh">準確率</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="summary-table-body" class="bg-white divide-y divide-gray-200">
+                    <!-- Rows will be injected here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 新增中英文備註區塊 -->
+        <div class="mt-8 p-4 bg-orange-100 border-l-4 border-orange-500 rounded-lg">
+            <p class="font-bold text-sm text-orange-700 mb-2">
+                <span class="bilingual-en">Important Note:</span>
+                <span class="bilingual-zh">重要備註：</span>
+            </p>
+            <p class="text-sm text-orange-700">
+                <span class="bilingual-en font-normal">Triage should be based on mass casualty principles, considering on-site rescue capacity and situational factors (e.g., pregnant women may be upgraded, Black-tagged patients not obviously deceased may be transported if resources permit, etc.).</span>
+                <span class="bilingual-zh block mt-1">
+                    <span class="text-lg font-extrabold">原則:</span>大量傷病患檢傷法。
+                    <span class="text-lg font-extrabold">偏好:</span>依現場救護能量及現場狀況(如孕婦可升一級,黑色如未明顯死亡救護能量充足也可後送...等)
+                </span>
+            </p>
+        </div>
+
+        <div class="mt-8 text-center">
+             <button onclick="resetGame()" class="action-button bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+                <span class="bilingual-en">Back to Start</span>
+                <span class="bilingual-zh block">返回起始畫面</span>
+            </button>
+        </div>
+        
+        <!-- 作者及版本資訊 -->
+        <footer class="mt-6 pt-3 border-t border-gray-200 text-xs text-right text-gray-500">
+            <p>
+                <span class="font-semibold text-gray-700">作者: 台南市政府消防局 莊進宏</span>
+            </p>
+            <p>
+                <span class="font-semibold text-gray-700">版本: Beta1141127</span>
+            </p>
+        </footer>
+    </div>
+
+</div>
+
+<script>
+(function(){
+const TOTAL_PATIENTS = 15; // 總傷患人數
+let pc=0; // Patient count
+let cp={}; // Current patient data
+let go=true;
+let difficulty = null; // Stores selected difficulty ('beginner' or 'pro')
+let scoreRecords = []; // 新增：用於記錄每位傷患的得分和時間
+
+// Timer variables
+let timerInterval = null; // Interval ID for the timer
+let startTime = 0; // Timestamp when the timer started (in milliseconds)
+
+const tg={RED:{en:"RED - Immediate",zh:"紅色 - 立即 (P1)",class:"red-bg", color: 'red'},YELLOW:{en:"YELLOW - Delayed",zh:"黃色 - 延遲 (P2)",class:"yellow-bg", color: 'yellow'},GREEN:{en:"GREEN - Minor",zh:"綠色 - 輕微 (P3)",class:"green-bg", color: 'green'},BLACK:{en:"BLACK - Deceased / Expectant",zh:"黑色 - 死亡 / 預期 (P0)",class:"black-bg", color: 'black'}};
+
+const pcE=document.getElementById('patient-card'),
+      mT=document.getElementById('main-title'),
+      sc=document.getElementById('status-container'),
+      sd=document.getElementById('status-display'),
+      pnd=document.getElementById('patient-number'),
+      trd=document.getElementById('triage-result'),
+      rrD=document.getElementById('resp-rate'),
+      rrZN=document.getElementById('resp-rate-zh-note'),
+      wtsd=document.getElementById('walk-test-status'),
+      aa=document.getElementById('airway-action'),
+      ame=document.getElementById('airway-message-en'),
+      amz=document.getElementById('airway-message-zh'),
+      npb=document.getElementById('next-patient-btn'),
+      fcd=document.getElementById('final-classification'),
+      scoreSummaryEl = document.getElementById('score-summary'); // 新增：得分報告區塊
+
+const rc=document.getElementById('resp-container'),pC=document.getElementById('pulse-container'),mC=document.getElementById('mental-container');
+const timerDisplay = document.getElementById('triage-timer'); // 計時器 DOM 元素
+const difficultyInfo = document.getElementById('difficulty-info');
+const newIncidentBtn = document.getElementById('new-incident-btn');
+
+const st={ambulatory:document.getElementById('step-ambulatory'),respiration:document.getElementById('step-respiration'),perfusion:document.getElementById('step-perfusion'),mental:document.getElementById('step-mental'),finalChoice:document.getElementById('step-final-choice'),conclusion:document.getElementById('step-conclusion')};
+
+/**
+ * 輔助函式：將毫秒轉換為 MM:SS 格式
+ * @param {number} ms 毫秒
+ * @returns {string} MM:SS 格式時間
+ */
+function formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+/**
+ * 設置遊戲難度並套用樣式
+ */
+function setDifficulty(level, clickedButton) {
+    // 移除所有按鈕的選中狀態
+    document.getElementById('difficulty-beginner').classList.remove('ring-4', 'ring-blue-400');
+    document.getElementById('difficulty-pro').classList.remove('ring-4', 'ring-blue-400');
+
+    // 設置當前難度和視覺選中狀態
+    difficulty = level;
+    clickedButton.classList.add('ring-4', 'ring-blue-400');
+
+    // 更新訊息和啟用開始按鈕
+    newIncidentBtn.disabled = false;
+    sc.classList.remove('hidden');
+
+    if (level === 'beginner') {
+        difficultyInfo.innerHTML = '<span class="bilingual-en text-green-700 font-bold">Beginner Mode: Buttons are color-coded based on the expected triage result.</span><span class="bilingual-zh block mt-1 text-green-700">初學者模式：按鈕會顯示顏色提示，顏色即為預期的檢傷結果。</span>';
+    } else {
+        difficultyInfo.innerHTML = '<span class="bilingual-en text-gray-700 font-bold">Professional Mode: Buttons are grayscale. Only the final choice buttons are colored.</span><span class="bilingual-zh block mt-1 text-gray-700">專業人員模式：步驟按鈕將取消顏色提示（灰階）。只有最終分類按鈕保留顏色。</span>';
+    }
+    
+    applyDifficultyStyles(level);
+}
+
+/**
+ * 根據難度套用樣式：移除或保留非最終分類按鈕的顏色
+ */
+function applyDifficultyStyles(level) {
+    const allColorClasses = [
+        'bg-green-500', 'hover:bg-green-600', 'bg-red-500', 'hover:bg-red-600', 
+        'bg-gray-400', 'hover:bg-gray-500', 'bg-yellow-500', 'hover:bg-yellow-600'
+    ];
+    
+    const beginnerColorMap = [
+        { step: st.ambulatory, index: 0, classes: ['bg-green-500', 'hover:bg-green-600'] },
+        { step: st.respiration, index: 0, classes: ['bg-gray-400', 'hover:bg-gray-500'] },
+        { step: st.respiration, index: 1, classes: ['bg-red-500', 'hover:bg-red-600'] },
+        { step: st.respiration, index: 2, classes: ['bg-green-500', 'hover:bg-green-600'] },
+        { step: st.perfusion, index: 0, classes: ['bg-red-500', 'hover:bg-red-600'] },
+        { step: st.perfusion, index: 1, classes: ['bg-green-500', 'hover:bg-green-600'] },
+        { step: st.mental, index: 0, classes: ['bg-red-500', 'hover:bg-red-600'] },
+        { step: st.mental, index: 1, classes: ['bg-yellow-500', 'hover:bg-yellow-600'] }
+    ];
+
+    const triageSteps = [st.ambulatory, st.respiration, st.perfusion, st.mental];
+    
+    triageSteps.forEach(step => {
+        const buttons = step.querySelectorAll('.action-button:not(.rpm-button)');
+        
+        buttons.forEach((btn, index) => {
+            btn.classList.remove(...allColorClasses, 'pro-mode-button');
+            
+            if (level === 'pro') {
+                btn.classList.add('pro-mode-button');
+            } else {
+                const colorEntry = beginnerColorMap.find(entry => entry.step === step && entry.index === index);
+                if (colorEntry) {
+                    btn.classList.add(...colorEntry.classes);
+                }
+            }
+        });
+    });
+}
+
+/**
+ * 啟動新的事件 (New Incident)
+ */
+function si(){
+    if (!difficulty) {
+        difficultyInfo.innerHTML = '<span class="bilingual-en text-red-600 font-bold">Error: Please select a difficulty level first!</span><span class="bilingual-zh block mt-1 text-red-600">錯誤：請先選擇一個難度等級！</span>';
+        return;
+    }
+    
+    stopTimer(); // 確保開始新事件時先停止計時器
+    scoreRecords = []; // 每次開始新事件時，清空得分記錄
+    pc=0;go=false;
+    
+    mT.classList.add('hidden');
+    sc.classList.add('hidden');
+    document.getElementById('difficulty-selection').classList.add('hidden'); // 隱藏難度選擇區塊
+    scoreSummaryEl.classList.add('hidden'); // 確保總結報告隱藏
+    pcE.classList.remove('hidden');
+
+    sd.innerHTML=`<span class="bilingual-en">Incident Active: Triage in Progress (${TOTAL_PATIENTS} Patients)</span><span class="bilingual-zh block mt-1">事件啟動：檢傷進行中 (${TOTAL_PATIENTS} 位傷患)</span>`;
+    
+    applyDifficultyStyles(difficulty);
+    
+    nP();
+}
+
+/**
+ * 啟動計時器
+ */
+function startTimer() {
+    stopTimer(); // 先清除任何現有的計時器
+    startTime = performance.now(); // 使用 performance.now() 獲取高精度時間
+    timerDisplay.textContent = '00:00';
+
+    timerInterval = setInterval(() => {
+        const elapsedTime = performance.now() - startTime;
+        timerDisplay.textContent = formatTime(elapsedTime);
+    }, 1000); // 每秒更新
+}
+
+/**
+ * 停止計時器
+ */
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+function gp(){
+    pc++;
+    const gs=[{en:"Male",zh:"男性"},{en:"Female",zh:"女性"}];const as=['25','35','50','65','42','28','70','19','30','45','55','60'];
+    const g=gs[Math.floor(Math.random()*gs.length)];const a=as[Math.floor(Math.random()*as.length)];
+    let cW=false,rr=0,pp=true,cO=true,fc=null;
+    const aR=Math.random()<0.5;
+    const scenario=Math.floor(Math.random()*6);
+    switch(scenario){
+    case 0:
+    cW=true;rr=15+Math.floor(Math.random()*10);pp=true;cO=true;fc=tg.GREEN;
+    break;
+    case 1:
+    cW=false;rr=0;
+    if(aR){fc=tg.RED;}else{fc=tg.BLACK;}
+    break;
+    case 2:
+    cW=false;rr=35+Math.floor(Math.random()*5);pp=true;cO=true;fc=tg.RED;
+    break;
+    case 3:
+    cW=false;rr=15+Math.floor(Math.random()*10);pp=false;cO=true;fc=tg.RED;
+    break;
+    case 4:
+    cW=false;rr=15+Math.floor(Math.random()*10);pp=true;cO=false;fc=tg.RED;
+    break;
+    case 5:
+    cW=false;rr=15+Math.floor(Math.random()*10);pp=true;cO=true;fc=tg.YELLOW;
+    break;
+    }
+    cp={id:pc,gender:g,age:a,canWalk:cW,respRate:rr,pulsePresent:pp,canObey:cO,airwayResponse:aR,correctTriage:fc};
+}
+
+function spU(){
+    pnd.textContent=cp.id;trd.classList.add('hidden');npb.disabled=true;
+    document.getElementById('patient-context').innerHTML=`<span class="bilingual-en">Age: ${cp.age}, Gender: ${cp.gender.en}</span><span class="bilingual-zh block mt-1">年齡: ${cp.age}, 性別: ${cp.gender.zh}</span>`;
+    wtsd.innerHTML=cp.canWalk?`<span class="bilingual-en text-green-700 font-bold">Can Walk → GREEN</span><span class="bilingual-zh block">✅ 能走動 → 綠色 (P3)</span>`:`<span class="bilingual-en text-red-700 font-bold">Cannot Walk → Proceed R-P-M</span><span class="bilingual-zh block">❌ 無法走動 → 繼續 R-P-M 檢查</span>`;
+    rrZN.textContent='';
+    if(cp.respRate===0){rrD.textContent='Absent';rrZN.textContent='（無呼吸）';}else{rrD.textContent=cp.respRate;rrZN.textContent='';}
+    document.getElementById('pulse-status').innerHTML=cp.pulsePresent?`<span class="bilingual-en text-green-700 font-bold">Present / CRT ≤ 2s</span><span class="bilingual-zh block">有脈搏 / CRT ≤ 2秒</span>`:`<span class="bilingual-en text-red-700 font-bold">Absent / CRT > 2s</span><span class="bilingual-zh block">無脈搏 / CRT > 2秒</span>`;
+    document.getElementById('mental-status-display').innerHTML=cp.canObey?`<span class="bilingual-en text-green-700 font-bold">Can Obey Commands (Alert/Verbal)</span><span class="bilingual-zh block">可遵從指令 (清醒/聲音)</span>`:`<span class="bilingual-en text-red-700 font-bold">Cannot Obey Commands (Painful/Unresponsive)</span><span class="bilingual-zh block">無法遵從指令 (疼痛/無反應)</span>`;
+    
+    // R, P, M 數值容器在開始時都隱藏
+    rc.classList.add('hidden');
+    pC.classList.add('hidden');
+    mC.classList.add('hidden');
+
+    Object.values(st).forEach(s=>s.classList.add('hidden'));
+    aa.classList.add('hidden');ame.textContent='';amz.textContent='';
+    Object.values(st).forEach(s=>{s.querySelectorAll('button').forEach(btn=>{btn.disabled=false;});});
+    st.ambulatory.classList.remove('hidden');
+    startTimer(); // 傷患資料更新完畢後啟動計時器
+}
+
+function tfc(){
+    Object.values(st).forEach(s=>s.classList.add('hidden'));
+    st.finalChoice.classList.remove('hidden');
+}
+
+function ft(chosenCategory,clickedButton){
+    if(clickedButton)clickedButton.blur();
+    st.finalChoice.classList.add('hidden');
+    
+    const isCorrect=chosenCategory===cp.correctTriage;
+    const elapsedTimeMs = performance.now() - startTime; // 記錄本次檢傷花費的毫秒數
+
+    // 記錄本次檢傷結果
+    scoreRecords.push({
+        triageTimeMs: elapsedTimeMs,
+        correctCategory: cp.correctTriage,
+        chosenCategory: chosenCategory,
+        isCorrect: isCorrect
+    });
+    
+    stR(chosenCategory,isCorrect, elapsedTimeMs);
+}
+
+function stR(category,isCorrect, elapsedTimeMs){
+    stopTimer(); // 檢傷分類完成後停止計時器
+    
+    const displayTime = formatTime(elapsedTimeMs);
+    
+    let fc=isCorrect?'bg-green-100 border-green-500 text-green-700':'bg-red-100 border-red-500 text-red-700';
+    let ft=isCorrect?`<span class="bilingual-en">CORRECT: The patient is categorized as ${category.en}. (Time: ${displayTime})</span><span class="bilingual-zh block">✅ 正確：這位傷患的分類是 ${category.zh}。(用時: ${displayTime})</span>`:`<span class="bilingual-en">INCORRECT: The correct category is ${cp.correctTriage.en}. You chose ${category.en}. (Time: ${displayTime})</span><span class="bilingual-zh block">❌ 錯誤：正確的分類是 ${cp.correctTriage.zh}。您選擇了 ${category.zh}。(用時: ${displayTime})</span>`;
+    
+    trd.classList.remove('hidden','red-bg','yellow-bg','green-bg','black-bg');
+    trd.classList.add(category.class);
+    trd.innerHTML=`<span class="bilingual-en">${category.en.split(' - ')[0]}</span><span class="bilingual-zh block">${category.zh.split('(')[0]}</span>`;
+    
+    fcd.innerHTML=`<div class="${fc} p-3 rounded-lg border-l-4 font-bold text-lg">${ft}</div>`;
+    rc.classList.remove('hidden');pC.classList.remove('hidden');mC.classList.remove('hidden');
+    st.conclusion.classList.remove('hidden');npb.disabled=false;
+    fcd.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function checkAmbulatory(cWR,clickedButton){
+    if(clickedButton)clickedButton.blur();
+    st.ambulatory.classList.add('hidden');
+    
+    if(cWR){
+        if(cp.canWalk){
+        ft(tg.GREEN);return;
+        }else{
+        tfc();return;
+        }
+    }
+    if(cWR===false){
+        if(!cp.canWalk){
+        // 無法走動，進入 R (Respiration) 步驟
+        
+        // 顯示 R 數值容器
+        rc.classList.remove('hidden');
+
+        st.respiration.classList.remove('hidden');
+        return;
+        }else{
+        tfc();return;
+        }
+    }
+}
+
+function checkRespiration(uI,clickedButton){
+    if(clickedButton)clickedButton.blur();
+    const Rbs=st.respiration.querySelectorAll('.grid > button');
+    Rbs.forEach(btn=>btn.disabled=true);
+    let cPT=false;
+    if(uI===0){
+    if(cp.respRate===0){
+    aa.classList.remove('hidden');
+    const sB=cp.airwayResponse;
+    if(sB){
+    aa.classList.remove('bg-red-100','text-red-700');aa.classList.add('bg-green-100','text-green-700');
+    ame.innerHTML=`<span class="text-green-800 font-bold">Result: Breathing Started (RED).</span>`;
+    amz.innerHTML=`<span class="text-green-800">結果：開始呼吸 (紅色)！</span>`; // 修正：確保只包含中文，且不帶額外的 font-bold
+    }else{
+    aa.classList.add('bg-red-100','text-red-700');aa.classList.remove('bg-green-100','text-green-700');
+    ame.innerHTML=`<span class="text-red-800 font-bold">Result: Still Absent (BLACK).</span>`;
+    amz.innerHTML=`<span class="text-red-800">結果：仍無呼吸 (黑色)。</span>`; // 修正：確保只包含中文，且不帶額外的 font-bold
+    }
+    tfc();
+    cPT=true;
+    }
+    }else if(uI>30){
+    if(cp.respRate>30){
+    tfc();
+    cPT=true;
+    }
+    }else{
+    if(cp.respRate>=10&&cp.respRate<=30){
+    st.respiration.classList.add('hidden');
+    
+    // 進入 P (Perfusion) 步驟
+    rc.classList.add('hidden'); // 隱藏 R 數值
+    pC.classList.remove('hidden'); // 顯示 P 數值
+    
+    st.perfusion.classList.remove('hidden');
+    cPT=true;
+    }
+    }
+    if(!cPT){tfc();}
+}
+
+function checkPerfusion(pAOCLR,clickedButton){
+    if(clickedButton)clickedButton.blur();
+    st.perfusion.classList.add('hidden');
+    if(cp.pulsePresent===!pAOCLR){
+        if(pAOCLR){
+        tfc();
+        }else{
+        // 進入 M (Mental) 步驟
+        pC.classList.add('hidden'); // 隱藏 P 數值
+        mC.classList.remove('hidden'); // 顯示 M 數值
+        
+        st.mental.classList.remove('hidden');
+        }
+    }else{
+        tfc();
+    }
+}
+
+function checkMental(cOR,clickedButton){
+    if(clickedButton)clickedButton.blur();
+    st.mental.classList.add('hidden');
+    // 進入最終確認
+    tfc();
+}
+
+function nP(){
+    // 檢查傷患人數是否達到 15
+    if(pc>=TOTAL_PATIENTS){
+    eI();return;
+    }
+    gp();spU();
+}
+
+/**
+ * 渲染得分總結報告
+ */
+function renderScoreSummary() {
+    let totalTimeMs = 0;
+    let correctCount = 0;
+    
+    // 統計每個分類的結果
+    const categoryStats = {
+        RED: { total: 0, correct: 0 },
+        YELLOW: { total: 0, correct: 0 },
+        GREEN: { total: 0, correct: 0 },
+        BLACK: { total: 0, correct: 0 }
+    };
+    
+    scoreRecords.forEach(record => {
+        totalTimeMs += record.triageTimeMs;
+        if (record.isCorrect) {
+            correctCount++;
+        }
+        
+        // 統計分類總數和正確數
+        // 確保使用正確的屬性來取得顏色鍵
+        const correctKey = record.correctCategory.color.toUpperCase();
+        if (categoryStats[correctKey]) {
+            categoryStats[correctKey].total++;
+            if (record.isCorrect) {
+                categoryStats[correctKey].correct++;
+            }
+        }
+    });
+
+    const totalPatients = scoreRecords.length;
+    const avgTimeMs = totalPatients > 0 ? totalTimeMs / totalPatients : 0;
+    const overallAccuracy = totalPatients > 0 ? (correctCount / totalPatients) * 100 : 0;
+
+    // 填充時間統計
+    document.getElementById('summary-total-time').textContent = formatTime(totalTimeMs);
+    document.getElementById('summary-avg-time').textContent = formatTime(avgTimeMs);
+
+    // 填充總體準確度
+    document.getElementById('summary-total-patients').textContent = totalPatients;
+    document.getElementById('summary-overall-accuracy').textContent = `${overallAccuracy.toFixed(1)}%`;
+
+    // 填充分類詳細表格
+    const tableBody = document.getElementById('summary-table-body');
+    tableBody.innerHTML = ''; // 清空表格內容
+
+    // 確保順序是紅黃綠黑
+    const triageOrder = ['RED', 'YELLOW', 'GREEN', 'BLACK'];
+
+    triageOrder.forEach(key => {
+        const category = tg[key];
+        const stats = categoryStats[key];
+        
+        // --- 修正邏輯: 如果 total 為 0，Accuracy 設為 100% ---
+        let accuracy = 0;
+        if (stats.total === 0) {
+            accuracy = 100; // 總數為 0，則正確率為 100%
+        } else {
+            accuracy = (stats.correct / stats.total) * 100;
+        }
+        // --- 修正邏輯結束 ---
+
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50';
+
+        const colorClass = category.class;
+
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    <span class="inline-block w-4 h-4 rounded-full ${colorClass} mr-3"></span>
+                    <div class="text-sm font-medium text-gray-900">
+                        <span class="bilingual-en">${category.en.split(' - ')[0]}</span>
+                        <span class="bilingual-zh block text-xs text-gray-500">${category.zh.split('(')[0]}</span>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-900">${stats.total}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-900">${stats.correct}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium ${accuracy >= 70 ? 'text-green-600' : 'text-red-600'}">
+                ${accuracy.toFixed(1)}%
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    // 顯示總結報告，隱藏其他區塊
+    pcE.classList.add('hidden');
+    scoreSummaryEl.classList.remove('hidden');
+    mT.classList.remove('hidden'); // 顯示主標題
+}
+
+
+function eI(){
+    stopTimer(); // 事件結束時停止計時器
+    go=true;
+    
+    // 渲染得分總結畫面
+    renderScoreSummary();
+    
+    // 重新顯示主標題和狀態容器，但隱藏難度選擇按鈕
+    sc.classList.remove('hidden');
+    sd.innerHTML=`<span class="bilingual-en">Incident Over. Total ${TOTAL_PATIENTS} patients triaged.</span><span class="bilingual-zh block mt-1">事件結束。共完成 ${TOTAL_PATIENTS} 位傷患檢傷。</span>`;
+    
+    // 禁用開始按鈕，直到遊戲重置
+    document.getElementById('new-incident-btn').disabled=true;
+}
+
+/**
+ * 重置遊戲狀態並返回起始畫面
+ */
+function resetGame() {
+    stopTimer();
+    // 清理所有狀態
+    pc = 0;
+    scoreRecords = [];
+    difficulty = null;
+    timerDisplay.textContent = '00:00';
+    
+    // 顯示起始畫面元素
+    mT.classList.remove('hidden');
+    document.getElementById('difficulty-selection').classList.remove('hidden');
+    scoreSummaryEl.classList.add('hidden');
+    pcE.classList.add('hidden');
+    sc.classList.add('hidden');
+    document.getElementById('new-incident-btn').disabled=true; // 預設禁用開始按鈕
+    
+    // 清除選中狀態
+    document.getElementById('difficulty-beginner').classList.remove('ring-4', 'ring-blue-400');
+    document.getElementById('difficulty-pro').classList.remove('ring-4', 'ring-blue-400');
+    difficultyInfo.innerHTML = '<span class="bilingual-en">Please select a difficulty level to start.</span><span class="bilingual-zh block">請選擇難度等級以開始。</span>';
+}
+
+window.addEventListener('load', () => {
+    document.body.addEventListener('contextmenu', event => event.preventDefault());
+    document.body.addEventListener('selectstart', event => event.preventDefault()); 
+});
+
+window.onload=function(){
+    document.getElementById('new-incident-btn').disabled=true; // 預設禁用開始按鈕
+}
+
+// 修正：將所有 HTML onclick 屬性需要的函式和物件暴露給全域範圍 (window)
+window.Triage = tg;
+window.setDifficulty = setDifficulty;
+window.startNewIncident = si;
+window.nextPatient = nP;
+window.checkAmbulatory = checkAmbulatory;
+window.checkRespiration = checkRespiration;
+window.checkPerfusion = checkPerfusion;
+window.checkMental = checkMental;
+window.finalizeTriage = ft;
+window.resetGame = resetGame; // 暴露新的重置函式
+
+})();
+</script>
+
+</body>
+</html>
