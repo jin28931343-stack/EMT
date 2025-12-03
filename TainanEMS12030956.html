@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>台南EMS指引</title>
+    
+    <!-- === PWA 手機專用設定 === -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="台南EMS">
+    <meta name="theme-color" content="#1e3a8a">
+    
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Star_of_Life2.svg/1024px-Star_of_Life2.svg.png">
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Star_of_Life2.svg/1024px-Star_of_Life2.svg.png">
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+        }
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fade-in-up 0.3s ease-out forwards;
+        }
+        /* 自定義滾動條樣式 */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-gray-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
+        
+        const Icon = ({ name, size = 24, className, ...props }) => {
+            const iconName = name.charAt(0).toUpperCase() + name.slice(1);
+            useEffect(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, [name]);
+            return <i data-lucide={name} width={size} height={size} className={className} {...props}></i>;
+        };
+
+        // --- 資料數據 ---
+        const guidelinesData = [
+            // === 壹、依據 ===
+            {
+                id: 'law-basis',
+                category: '壹、依據',
+                code: 'Law',
+                title: '法規依據',
+                keywords: ['依據', '緊急醫療救護法', '作業程序', '法規'],
+                content: [
+                '「緊急醫療救護法」第二十七條規定：救護技術員應依緊急病人救護作業程序，施行救護。前項緊急病人救護作業程序，由直轄市、縣(市)衛生主管機關定之。',
+                '臺南市緊急病人救護作業程序第十三條規定：緊急病人現場救護，應依本府消防局救護技術員緊急救護標準作業流程暨步驟手冊規定辦理。',
+                '每次救護均有其特異性，因此救護技術員仍應視緊急病人之狀況、現場環境、救護人力與器材裝備等因素進行最適當的緊急救護處置。'
+                ],
+                note: '本指引為執行緊急救護之準則，遇特殊狀況應以病人最大利益為考量。'
+            },
+
+            // === 貳、緊急救護作業程序 ===
+            {
+                id: 'sec-2-main',
+                category: '貳、緊急救護作業程序',
+                code: 'Procedure',
+                title: '緊急救護作業程序',
+                keywords: ['貳', '作業程序', '參考流程', '預立醫囑', '名詞符號'],
+                isParent: true, 
+                subItems: [
+                    {
+                        id: 'proc-1-reference',
+                        title: '參考流程與處置原則',
+                        type: 'text', 
+                        alignment: 'left',
+                        scrollable: true, // 開啟滾動條功能
+                        content: [
+                            '緊急醫療救護參考流程包含流程圖示之流程與條列式的處置原則。',
+                            '到院前救護流程均包含「現場評估」通用流程、「非外傷或外傷」通用流程、「車內照護」通用流程與到院「病人交接」通用流程。救護技術員到達現場後應先引用「現場評估」通用流程，從自我保護到評估是否需要動員更大救護能量依序進行，並判斷救護案件屬「非外傷」或「外傷」而進入「非外傷」通用流程或「外傷」通用流程。在檢查意識、問主訴時即可依病人最主要或最嚴重之症狀進一步選用適當流程，如主訴呼吸困難病人建議採用「呼吸困難」流程；亦可在評估過程中依據傷勢判斷或鑑別診斷結果採用適當流程，例如病人因外傷事件導致肢體骨折則可採用「肢體骨折」流程予以適當處置。上救護車後即進入車內照護時期，應遵循「車內照護」通用流程照護病人。',
+                            '診所之緊急病人轉送中如有醫護人員隨行，可由其協助照護病人，惟其所為處置如超出本局作業參考指引之範圍時，應將其處置內容明載於救護紀錄表，以釐清責任歸屬。具備高級救護技術員資格者除依本參考指引所授權之範圍使用藥物外，不得有其他給藥之行為，亦不得將所授權之藥品提供給任何人使用。',
+                            '執行救護流程時，若無法決定病人病情應適用何種救護參考流程時，應立即尋求線上醫療指導，並依線上醫療指導之指引處置病人，後續依「緊急醫療救護法施行細則」第九條規定將醫師指示內容填註於救護紀錄表。'
+                        ], 
+                        note: ''
+                    },
+                    {
+                        id: 'proc-2-order',
+                        title: '預立醫囑與線上醫療指導申請',
+                        type: 'text',
+                        alignment: 'left',
+                        scrollable: true, // 開啟滾動條功能
+                        content: [
+                            '【預立醫囑】',
+                            '1. 救護技術員依其等級得執行本作業參考指引所規範之處置及預立醫囑。',
+                            '2. 高級救護技術員依預立醫囑進行之救護技術及藥物處置，於本作業參考指引以 [P] 標記。',
+                            ' ',
+                            '【線上醫療指導申請之條件】',
+                            '1. 高級救護項目之執行，依照本作業流程規範，需取得線上醫療指導許可，於本作業參考指引以「*」標記。',
+                            '2. 緊急救護中，有醫療或倫常疑義，救護技術員與救護派遣員均無法解決時。',
+                            '3. 事故現場或送醫途中，醫護人員與救護技術員意見相左時。',
+                            '4. 災難或大量病人時。',
+                            ' ',
+                            '【線上醫療指導之責任與義務】',
+                            '1. 救護技術員應儘量彙集現場與病人完整情況，申請線上醫療指導。',
+                            '2. 線上醫療指導員應依救護技術員報告，與本地之緊急醫療救護水準，依照標準作業流程提供適切之醫療指導。',
+                            '3. 救護技術員需將線上指導內容詳實填註於救護紀錄表，並交由醫療指導醫師核簽。',
+                            '4. 救護技術員應遵循線上醫療指導，並於返隊後視情況製作案例，或醫療指導醫師至分隊或其他救護研習場合時報告。',
+                            ' ',
+                            '【線上醫療指導之申請與通訊方式】',
+                            '1. 使用電話撥打指揮中心，請中心聯絡醫療指導醫師，開啟三方通話並且由指揮中心端錄音相關資訊。',
+                            '2. 使用救護平板於線上指導群組，尋求醫療指導醫師，並可視情況開啟視訊通話。'
+                        ],
+                        note: ''
+                    },
+                    {
+                        id: 'proc-3-terms',
+                        title: '名詞符號說明',
+                        type: 'text',
+                        alignment: 'left',
+                        scrollable: true,
+                        content: [
+                            '（一）救護對象之稱呼：',
+                            '外傷、非外傷統一稱為病人。',
+                            ' ',
+                            '（二）救護對象之定義：',
+                            '1. 成年與青少年(Adult and adolescent)：已有第二性徵者。',
+                            '2. 兒童(Child)：1歲～青春期。',
+                            '3. 嬰兒(Infant)：1個月～1歲。',
+                            '4. 新生兒(Neonate or new born)：<1個月。',
+                            ' ',
+                            '（三）流程或原則之編碼原則：',
+                            '以英文字母為字首來代表該流程屬性，並以阿拉伯數字之順序標示其排序。說明如下：',
+                            'C：通用流程(Common Operating Procedure)',
+                            'M：非外傷救護流程(Medical Operating Procedure)',
+                            'T：外傷救護流程(Trauma Operating Procedure)',
+                            'S：特殊救護流程(Special Operating Procedure)',
+                            ' ',
+                            '（四）標準作業流程符號意義：'
+                        ],
+                        // 加入圖片路徑
+                        image: 'standard.png',
+                        note: ''
+                    }
+                ]
+            },
+
+            // === 參、緊急救護作業流程 (含 C1-C6, M1-M14, T1-T7, S1-S9, S10) ===
+            {
+                id: 'sec-3-main',
+                category: '參、緊急救護作業流程',
+                code: 'Procedure', 
+                title: '緊急救護作業流程',
+                keywords: ['參', '作業流程', '通用', '外傷', '非外傷', '特殊'],
+                isParent: true,
+                subItems: [
+                    {
+                        id: 'flow-1-common',
+                        title: '通用流程 (Common Operating Procedure)',
+                        content: [], 
+                        note: '',
+                        grandChildItems: [
+                            {
+                                id: 'C1',
+                                code: 'C1',
+                                title: '「現場評估」通用流程',
+                                content: [
+                                    '到達現場：選擇安全停泊位置，攜帶必要裝備 (急救包、氧氣、AED)。',
+                                    '自我保護 (BSI)：戴手套、口罩，必要時穿著隔離衣、護目鏡。',
+                                    '現場安全評估：確認有無危險 (交通、暴力、中毒、火災)。若不安全，請求支援並撤離。',
+                                    '判斷傷病患人數與性質：是否為大量傷病患？是外傷 (Trauma) 還是非外傷 (Medical)？',
+                                    '請求支援：若超出救護能量，立即回報指揮中心請求加派人車。'
+                                ],
+                                note: '現場安全是最高原則。若現場不安全，應立即退至安全區域。'
+                            },
+                            {
+                                id: 'C2',
+                                code: 'C2',
+                                title: '「非外傷」通用流程',
+                                content: [
+                                    '初級評估：檢查意識 (AVPU)、呼吸道、呼吸、循環 (ABC)。',
+                                    '判斷危急個案：若為危急個案，應儘速送醫並在車上完成後續評估。',
+                                    '病史詢問：SAMPLE (症狀、過敏、藥物、病史、最後一餐、事件) 與 OPQRST。',
+                                    '理學檢查：重點式身體檢查 (頭頸胸腹骨盆四肢)。',
+                                    '處置：給氧、建立 IV/IO、監測生命徵象 (SpO2, BP, ECG)。',
+                                    '鑑別診斷：考慮低血糖、腦中風、心肌梗塞等可能性。'
+                                ],
+                                note: '若意識不清 (GCS < 14) 一律測量血糖。'
+                            },
+                            {
+                                id: 'C3',
+                                code: 'C3',
+                                title: '「外傷」通用流程',
+                                content: [
+                                    'X (Exsanguination)：優先控制災難性大出血 (止血帶、加壓)。',
+                                    'A (Airway)：呼吸道處置與頸椎限制 (C-spine)。',
+                                    'B (Breathing)：呼吸評估，給予高濃度氧氣。',
+                                    'C (Circulation)：循環評估，檢查休克徵象，建立大管徑 IV。',
+                                    'D (Disability)：神經學評估 (GCS, 瞳孔)。',
+                                    'E (Exposure)：暴露傷口與環境控制 (預防失溫)。',
+                                    '重大外傷判斷：若符合重大外傷標準，送往創傷中心。'
+                                ],
+                                note: '創傷病患需注意黃金時間，現場停留時間應小於 10 分鐘 (Platinum 10 minutes)。'
+                            },
+                            {
+                                id: 'C4',
+                                code: 'C4',
+                                title: '「車內照護」通用流程',
+                                content: [
+                                    '持續監測：危急個案每 5 分鐘、非危急每 15 分鐘評估一次生命徵象。',
+                                    '再評估：檢查處置效果 (如止血帶是否鬆脫、夾板是否固定)。',
+                                    '通訊：預先聯絡接收醫院，回報病患狀況 (ISBAR/IMIST)。',
+                                    '心理支持：安撫病患與家屬情緒。'
+                                ],
+                                note: '運送途中若病患狀況改變 (如 OHCA)，應立即停車急救或依流程處置。'
+                            },
+                            {
+                                id: 'C5',
+                                code: 'C5',
+                                title: '到院「病患交接」通用流程',
+                                content: [
+                                    '到達檢傷：向檢傷護理師報告主訴與檢傷級數。',
+                                    '交班內容 (IMIST)：',
+                                    '- I (Identification): 病患身分',
+                                    '- M (Mechanism/Medical): 機轉/主訴',
+                                    '- I (Injury/Illness): 發現的傷害/病情',
+                                    '- S (Signs): 生命徵象 (含 GCS)',
+                                    '- T (Treatment): 已做的處置與反應',
+                                    '移床與文件：協助移床，完成救護紀錄表簽名。'
+                                ],
+                                note: '交接務必清楚完整，確保醫療連續性。'
+                            },
+                            {
+                                id: 'C6',
+                                code: 'C6',
+                                title: '「心肺功能停止」流程',
+                                content: [
+                                    '確認：無意識、無呼吸、無脈搏 -> 立即 CPR (30:2 或 不中斷)。',
+                                    '品質：按壓速率 100-120/min，深度 5-6cm，胸回彈，中斷<10秒。',
+                                    'AED：儘早分析。VF/pVT -> 電擊 -> 電擊後立即 CPR。',
+                                    '氣道：建立聲門上呼吸道 (SGA) 或 氣管內管 (Endo) + ETCO2。',
+                                    '管路：建立 IV/IO。',
+                                    '藥物 (ALS)：Epinephrine 1mg (每3-5分)；Amiodarone (300mg/150mg)。',
+                                    '後送：考慮使用機械式按壓器，儘速送醫。'
+                                ],
+                                note: '高品質 CPR 與早期去顫是存活關鍵。'
+                            }
+                        ]
+                    },
+                    {
+                        id: 'flow-2-medic',
+                        title: '非外傷救護流程 (Medic Operating Procedure)',
+                        content: [], 
+                        note: '',
+                        grandChildItems: [
+                            { id: 'M1', code: 'M1', title: '「意識改變」流程', content: [], note: '' },
+                            { id: 'M2', code: 'M2', title: '「異物哽塞」流程', content: [], note: '' },
+                            { id: 'M3', code: 'M3', title: '「嚴重過敏」流程', content: [], note: '' },
+                            { id: 'M4', code: 'M4', title: '「呼吸困難」流程', content: [], note: '' },
+                            { id: 'M5', code: 'M5', title: '「疑似急性肺水腫、低血壓、休克」流程', content: [], note: '' },
+                            { id: 'M6', code: 'M6', title: '「疑似缺血性胸痛」流程', content: [], note: '' },
+                            { id: 'M7', code: 'M7', title: '「疑似腦中風」流程', content: [], note: '' },
+                            { id: 'M8', code: 'M8', title: '「血糖異常」流程', content: [], note: '' },
+                            { id: 'M9', code: 'M9', title: '「中毒及藥物過量」流程', content: [], note: '' },
+                            { id: 'M10', code: 'M10', title: '「癲癇/抽搐」流程', content: [], note: '' },
+                            { id: 'M11', code: 'M11', title: '「產科急症」流程', content: [], note: '' },
+                            { id: 'M12', code: 'M12', title: '「緊急生產」流程', content: [], note: '' },
+                            { id: 'M13', code: 'M13', title: '「新生兒」流程', content: [], note: '' },
+                            { id: 'M14', code: 'M14', title: '「熱急症」流程', content: [], note: '' }
+                        ]
+                    },
+                    {
+                        id: 'flow-3-trauma',
+                        title: '外傷救護流程 (Trauma Operating Procedure)',
+                        content: [], 
+                        note: '',
+                        grandChildItems: [
+                            { id: 'T1', code: 'T1', title: '「外傷性腦損傷」流程', content: [], note: '' },
+                            { id: 'T2', code: 'T2', title: '「胸部外傷」流程', content: [], note: '' },
+                            { id: 'T3', code: 'T3', title: '「腹部外傷」流程', content: [], note: '' },
+                            { id: 'T4', code: 'T4', title: '「肢體外傷」流程', content: [], note: '' },
+                            { id: 'T5', code: 'T5', title: '「疑似壓碎傷症候群」流程', content: [], note: '' },
+                            { id: 'T6', code: 'T6', title: '「燒灼傷」流程', content: [], note: '' },
+                            { id: 'T7', code: 'T7', title: '「疑似蛇類咬傷」流程', content: [], note: '' }
+                        ]
+                    },
+                    {
+                        id: 'flow-4-special',
+                        title: '特殊救護流程 (Special Operating Procedure)',
+                        type: 'text', // Enable text rendering features
+                        alignment: 'left',
+                        content: [
+                            '「特殊救護流程」中，各級救護技術員會遇到相關特殊狀況，可參考下方相對應流程建議。',
+                            '以 S 為字首，並依序以阿拉伯數字編號，包括：',
+                            'S1.「成人氣管插管」流程',
+                            'S2.「成人不穩定頻脈」流程',
+                            'S3.「成人不穩定緩脈」流程',
+                            'S4.「成人到院前疼痛緩解」流程',
+                            'S5.「精神異常行為急症」流程',
+                            'S6.「不施行心肺復甦術」處理原則',
+                            'S7.「病人拒絕醫療；拒絕送醫」處理原則',
+                            'S8.「大量傷病患及多重傷病患」處理原則',
+                            'S9.「支援院外緊急醫療服務」處理原則'
+                        ], 
+                        note: '',
+                        grandChildItems: [
+                            { id: 'S1', code: 'S1', title: '「成人氣管插管」流程', content: [], note: '' },
+                            { id: 'S2', code: 'S2', title: '「成人不穩定頻脈」流程', content: [], note: '' },
+                            { id: 'S3', code: 'S3', title: '「成人不穩定緩脈」流程', content: [], note: '' },
+                            { id: 'S4', code: 'S4', title: '「成人到院前疼痛緩解」流程', content: [], note: '' },
+                            { id: 'S5', code: 'S5', title: '「精神異常行為急症」流程', content: [], note: '' },
+                            { id: 'S6', code: 'S6', title: '「不施行心肺復甦術」處理原則', content: [], note: '' },
+                            { id: 'S7', code: 'S7', title: '「病人拒絕醫療；拒絕送醫」處理原則', content: [], note: '' },
+                            { id: 'S8', code: 'S8', title: '「大量傷病患及多重傷病患」處理原則', content: [], note: '' },
+                            { id: 'S9', code: 'S9', title: '「支援院外緊急醫療服務」處理原則', content: [], note: '' },
+                            {
+                                id: 'S10-search',
+                                category: '特殊流程 (Special)',
+                                code: 'S10',
+                                title: '「重大外傷施作超音波」處理原則',
+                                keywords: ['S10', '超音波', '重大外傷', 'FAST', 'eFAST', '氣血胸', '腹內出血'],
+                                content: [
+                                    '【適應症】',
+                                    '1. 到達現場發現病人為重大外傷，且有生命徵象不穩定（低血壓、心跳快、呼吸快），即可考慮施行。',
+                                    '2. 創傷性 OHCA 病人，於急救過程中亦可施行。',
+                                    ' ',
+                                    '【禁忌症】',
+                                    '1. 病人躁動無法配合。',
+                                    '2. 施行部位有開放性傷口或燒燙傷。',
+                                    ' ',
+                                    '【操作流程】',
+                                    '1. 準備：開啟超音波機器，選擇 FAST 探頭及模式。',
+                                    '2. 掃描：依序掃描 RUQ (右上腹/肝腎)、LUQ (左上腹/脾腎)、Pelvis (骨盆/膀胱)、Pericardium (劍突下/心包膜) 及 eFAST (兩側前胸/氣胸)。',
+                                    '3. 判讀：',
+                                    '   (1) 陽性 (Positive)：發現腹腔內游離液體 (Free fluid)、心包膜積液或氣胸徵象 (Lung point absent, Barcode sign)。',
+                                    '   (2) 陰性 (Negative)：未發現上述徵象。',
+                                    '   (3) 不確定 (Indeterminate)：影像不清或無法判讀。',
+                                    '4. 處置：',
+                                    '   (1) 若掃描結果為陽性且生命徵象不穩定，應儘速送往具備緊急手術能力之創傷中心，並預先通報。',
+                                    '   (2) 掃描過程不應延誤現場處置及後送時間，建議於車上或現場等待脫困時進行。',
+                                    ' ',
+                                    '【注意事項】',
+                                    '1. 超音波檢查僅為輔助診斷工具，不可取代理學檢查。',
+                                    '2. 若病人生命徵象極度不穩定，應優先進行急救復甦及快速後送。',
+                                    '3. 檢查結果應記錄於救護紀錄表。'
+                                ],
+                                note: ''
+                            }
+                        ]
+                    }
+                ]
+            },
+            
+            // === 肆、其他救護相關 ===
+            {
+                id: 'sec-4-others',
+                category: '肆、其他救護相關',
+                code: 'Procedure',
+                title: '其他救護相關',
+                keywords: ['肆', '其他', '相關', '原則', '流程'],
+                isParent: true, 
+                subItems: [
+                    {
+                        id: 'other-1',
+                        title: '臺南市政府消防局緊急救護執行原則',
+                        content: [], 
+                        note: ''
+                    },
+                    {
+                        id: 'other-2',
+                        title: '消毒流程',
+                        content: [], 
+                        note: ''
+                    },
+                    {
+                        id: 'other-3',
+                        title: '救護技術員因公受傷(含尖銳物品扎傷或血、體液曝觸)流程',
+                        content: [], 
+                        note: ''
+                    },
+                    {
+                        id: 'other-4',
+                        title: '救護影像保存流程',
+                        content: [], 
+                        note: ''
+                    },
+                    {
+                        id: 'other-5',
+                        title: 'AED檔案保存',
+                        content: [], 
+                        note: ''
+                    },
+                    {
+                        id: 'other-6',
+                        title: '救護車車禍處理',
+                        content: [], 
+                        note: ''
+                    },
+                    {
+                        id: 'other-7',
+                        title: '救護紀錄表填寫說明',
+                        content: [], 
+                        note: ''
+                    },
+                    {
+                        id: 'other-8',
+                        title: '跳島策略計畫',
+                        content: [], 
+                        note: ''
+                    }
+                ]
+            }
+        ];
+
+        // --- 元件：生命之星背景圖 (SVG) ---
+        const StarOfLifeBackground = () => (
+            <div className="fixed inset-0 z-0 pointer-events-none flex items-center justify-center opacity-10 overflow-hidden">
+                <svg 
+                viewBox="0 0 500 500" 
+                className="w-[80vw] h-[80vw] max-w-[500px] max-h-[500px] text-blue-700 fill-current"
+                >
+                <path d="M220,10 L280,10 L280,150 L400,80 L430,130 L310,200 L430,270 L400,320 L280,250 L280,490 L220,490 L220,350 L100,420 L70,370 L190,300 L70,230 L100,180 L220,250 Z" stroke="white" strokeWidth="10" />
+                <path d="M245,100 L245,400" stroke="white" strokeWidth="15" strokeLinecap="round" />
+                <path d="M245,380 C220,380 200,360 220,340 C260,300 280,260 245,240 C210,220 230,180 255,160" stroke="white" strokeWidth="10" fill="none" />
+                </svg>
+            </div>
+        );
+
+        // --- 元件：高亮文字 (HighlightText) ---
+        const HighlightText = ({ text, highlight }) => {
+            if (!highlight || !text) return <>{text}</>;
+
+            // 使用正則表達式分割文字，保留搜尋詞
+            const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
+            
+            return (
+                <>
+                {parts.map((part, i) => 
+                    part.toLowerCase() === highlight.toLowerCase() ? (
+                    <span key={i} className="bg-yellow-300 text-black font-bold px-0.5 rounded-sm shadow-sm decoration-clone">
+                        {part}
+                    </span>
+                    ) : (
+                    part
+                    )
+                )}
+                </>
+            );
+        };
+
+        // --- 元件：指引卡片 ---
+        const GuidelineCard = ({ item, isExpanded, toggleExpand, searchTerm }) => {
+            const [expandedSubItems, setExpandedSubItems] = useState({});
+            const [expandedGrandChildItems, setExpandedGrandChildItems] = useState({});
+
+            const toggleSubItem = (subId, e) => {
+                e.stopPropagation();
+                setExpandedSubItems(prev => ({ ...prev, [subId]: !prev[subId] }));
+            };
+
+            const toggleGrandChildItem = (grandChildId, e) => {
+                e.stopPropagation();
+                setExpandedGrandChildItems(prev => ({ ...prev, [grandChildId]: !prev[grandChildId] }));
+            };
+
+            const getIcon = (code) => {
+                if (code === 'Law') return 'gavel';
+                if (code === 'Procedure') return 'file-text'; 
+                if (code.startsWith('C') || code.startsWith('S')) return 'shield';
+                if (code.startsWith('M')) return 'stethoscope';
+                if (code.startsWith('T')) return 'alert-circle';
+                return 'activity';
+            };
+
+            const getTagColor = (code) => {
+                if (code === 'Law') return 'bg-amber-100 text-amber-800 border-amber-200';
+                if (code === 'Procedure') return 'bg-orange-100 text-orange-800 border-orange-200'; 
+                if (code.startsWith('C')) return 'bg-gray-100 text-gray-700 border-gray-200';
+                if (code.startsWith('M')) return 'bg-green-50 text-green-700 border-green-200';
+                if (code.startsWith('T')) return 'bg-red-50 text-red-700 border-red-200';
+                if (code.startsWith('S')) return 'bg-purple-50 text-purple-700 border-purple-200';
+                return 'bg-blue-50 text-blue-700 border-blue-200';
+            };
+
+            // Parent Item (貳、參、肆)
+            if (item.isParent) {
+                return (
+                    <div className={`relative z-10 mb-3 overflow-hidden rounded-xl border transition-all duration-300 ${isExpanded ? 'border-orange-400 shadow-md bg-white ring-1 ring-orange-100' : 'border-slate-200 bg-white/95 hover:bg-white shadow-sm'}`}>
+                        <button onClick={toggleExpand} className="flex w-full items-center justify-between p-4 text-left focus:outline-none">
+                            <div className="flex items-center gap-3">
+                                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isExpanded ? 'bg-orange-600 text-white' : 'bg-orange-100 text-orange-600'}`}>
+                                    <Icon name={getIcon(item.code)} size={20} />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className={`px-2 py-0.5 text-xs font-bold rounded border ${getTagColor(item.code)}`}>
+                                            <HighlightText text={item.category.split('、')[0]} highlight={searchTerm} />
+                                        </span>
+                                        <span className="text-xs font-medium text-gray-500">
+                                            <HighlightText text={item.category} highlight={searchTerm} />
+                                        </span>
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-800 leading-tight">
+                                        <HighlightText text={item.title} highlight={searchTerm} />
+                                    </h3>
+                                </div>
+                            </div>
+                            {isExpanded ? <Icon name="chevron-up" className="text-orange-500 shrink-0 ml-2" /> : <Icon name="chevron-down" className="text-gray-400 shrink-0 ml-2" />}
+                        </button>
+
+                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                            <div className="border-t border-gray-100 bg-orange-50/30 p-2 md:p-4 space-y-2">
+                                {item.subItems.map((subItem) => (
+                                    <div key={subItem.id} className="border border-orange-200 rounded-lg bg-white overflow-hidden">
+                                        <button onClick={(e) => toggleSubItem(subItem.id, e)} className="flex w-full items-center justify-between p-3 text-left hover:bg-orange-50/50 transition-colors">
+                                            <div className="flex items-center gap-2">
+                                                <div className="h-1.5 w-1.5 rounded-full bg-orange-400 shrink-0"></div>
+                                                <span className="font-medium text-gray-700">
+                                                    <HighlightText text={subItem.title} highlight={searchTerm} />
+                                                </span>
+                                            </div>
+                                            {expandedSubItems[subItem.id] ? <Icon name="minus" size={16} className="text-orange-400" /> : <Icon name="plus" size={16} className="text-gray-400" />}
+                                        </button>
+
+                                        <div className={`overflow-hidden transition-all duration-300 ${expandedSubItems[subItem.id] ? 'max-h-[3000px] opacity-100 border-t border-orange-100' : 'max-h-0 opacity-0'}`}>
+                                            
+                                            {/* 1. 先顯示文字內容 (Content) 與 圖片 (Image) */}
+                                            {((subItem.content && subItem.content.length > 0) || subItem.image) && (
+                                                <div className={`p-4 bg-gray-50 text-base text-gray-800 ${subItem.alignment === 'center' ? 'text-center' : 'text-left'} ${subItem.scrollable ? 'max-h-64 overflow-y-auto custom-scrollbar' : ''}`}>
+                                                    {subItem.type === 'text' ? (
+                                                        <div className="space-y-4 leading-relaxed">
+                                                            {subItem.content.map((para, idx) => (
+                                                                <p key={idx}><HighlightText text={para} highlight={searchTerm} /></p>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <ol className="list-decimal ml-5 space-y-1">
+                                                            {subItem.content.map((c, idx) => (
+                                                                <li key={idx}><HighlightText text={c} highlight={searchTerm} /></li>
+                                                            ))}
+                                                        </ol>
+                                                    )}
+                                                    
+                                                    {/* 1.5. 顯示圖片 (修改: 移至可滾動區域內) */}
+                                                    {subItem.image && (
+                                                        <div className="mt-4 w-full">
+                                                            <img src={subItem.image} alt="illustration" className="w-full h-auto object-contain border border-gray-200 rounded bg-white" />
+                                                        </div>
+                                                    )}
+
+                                                    {subItem.note && <div className="mt-2 text-xs text-orange-600 bg-orange-50 p-2 rounded">註: {subItem.note}</div>}
+                                                </div>
+                                            )}
+
+                                            {/* 2. 再顯示子選單 (GrandChild Items) */}
+                                            {subItem.grandChildItems && (
+                                                 <div className="p-2 bg-gray-50 space-y-2 border-t border-gray-100">
+                                                     {subItem.grandChildItems.map((grandChild) => (
+                                                         <div key={grandChild.id} className="border border-gray-200 rounded bg-white">
+                                                             <button onClick={(e) => toggleGrandChildItem(grandChild.id, e)} className="flex w-full items-center justify-between p-3 text-left hover:bg-blue-50 transition-colors">
+                                                                 <div className="flex items-center gap-2">
+                                                                     <span className="bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded border border-gray-200 font-mono">{grandChild.code}</span>
+                                                                     <span className="text-sm font-medium text-gray-800">
+                                                                         <HighlightText text={grandChild.title} highlight={searchTerm} />
+                                                                     </span>
+                                                                 </div>
+                                                                 {expandedGrandChildItems[grandChild.id] ? <Icon name="chevron-up" size={14} className="text-blue-500" /> : <Icon name="chevron-down" size={14} className="text-gray-400" />}
+                                                             </button>
+                                                             
+                                                             <div className={`overflow-hidden transition-all duration-300 ${expandedGrandChildItems[grandChild.id] ? 'max-h-[1000px] opacity-100 border-t border-gray-100' : 'max-h-0 opacity-0'}`}>
+                                                                 <div className="p-3 bg-slate-50 text-sm text-gray-600">
+                                                                    {grandChild.content.length > 0 ? (
+                                                                        <ol className="list-decimal ml-5 space-y-1">
+                                                                            {grandChild.content.map((c, idx) => (
+                                                                                <li key={idx}><HighlightText text={c} highlight={searchTerm} /></li>
+                                                                            ))}
+                                                                        </ol>
+                                                                    ) : (
+                                                                        <p className="italic text-gray-400 pl-2">內容待補...</p>
+                                                                    )}
+                                                                    {grandChild.note && (
+                                                                        <div className="mt-2 text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-100 flex gap-1">
+                                                                            <Icon name="info" size={14} className="shrink-0 mt-0.5" />
+                                                                            <div><span className="font-bold">注意：</span><HighlightText text={grandChild.note} highlight={searchTerm} /></div>
+                                                                        </div>
+                                                                    )}
+                                                                 </div>
+                                                             </div>
+                                                         </div>
+                                                     ))}
+                                                 </div>
+                                            )}
+                                            
+                                            {/* 3. 若兩者皆無則顯示待補 */}
+                                            {(!subItem.content || subItem.content.length === 0) && !subItem.grandChildItems && !subItem.image && (
+                                                <div className="p-4 bg-gray-50 text-sm text-gray-400 italic pl-2">內容待補...</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Standard Item
+            return (
+                <div className={`relative z-10 mb-3 overflow-hidden rounded-xl border transition-all duration-300 ${isExpanded ? 'border-blue-500 shadow-md bg-white ring-1 ring-blue-200' : 'border-slate-200 bg-white/95 hover:bg-white shadow-sm'}`}>
+                    <button onClick={toggleExpand} className="flex w-full items-center justify-between p-4 text-left focus:outline-none">
+                        <div className="flex items-center gap-3">
+                            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isExpanded ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-600'}`}>
+                                <Icon name={getIcon(item.code)} size={20} />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className={`px-2 py-0.5 text-xs font-bold rounded border ${getTagColor(item.code)}`}>
+                                        <HighlightText text={item.code === 'Law' ? '壹、依據' : item.code} highlight={searchTerm} />
+                                    </span>
+                                    <span className="text-xs font-medium text-gray-500">
+                                        <HighlightText text={item.category} highlight={searchTerm} />
+                                    </span>
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-800 leading-tight">
+                                    <HighlightText text={item.title} highlight={searchTerm} />
+                                </h3>
+                            </div>
+                        </div>
+                        {isExpanded ? <Icon name="chevron-up" className="text-blue-500 shrink-0 ml-2" /> : <Icon name="chevron-down" className="text-gray-400 shrink-0 ml-2" />}
+                    </button>
+
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[1500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                        <div className="border-t border-gray-100 bg-slate-50/80 p-4">
+                            {item.code === 'Law' ? (
+                                <div className="space-y-4 text-gray-700 leading-relaxed text-justify px-2">
+                                    {item.content.map((para, idx) => (
+                                        <p key={idx} className="indent-8 font-serif text-lg"><HighlightText text={para} highlight={searchTerm} /></p>
+                                    ))}
+                                </div>
+                            ) : (
+                                <ol className="ml-5 list-decimal space-y-3 text-gray-700">
+                                    {item.content.length > 0 ? (
+                                        item.content.map((step, idx) => (
+                                            <li key={idx} className="pl-1 leading-relaxed"><HighlightText text={step} highlight={searchTerm} /></li>
+                                        ))
+                                    ) : (
+                                        <li className="pl-1 leading-relaxed text-gray-400 italic">內容待補</li>
+                                    )}
+                                </ol>
+                            )}
+                            {item.note && (
+                                <div className="mt-4 flex gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 border border-amber-200">
+                                    <Icon name="info" size={18} className="shrink-0 mt-0.5 text-amber-600" />
+                                    <div>
+                                        <strong className="block mb-1 text-amber-900">注意事項：</strong>
+                                        <HighlightText text={item.note} highlight={searchTerm} />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const PrefaceModal = ({ isOpen, onClose }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-blue-950/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
+                    <div className="relative z-10 w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl bg-white shadow-2xl animate-fade-in-up">
+                        <button onClick={onClose} className="absolute top-4 right-4 rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-gray-200 transition-colors"><Icon name="x" size={20} /></button>
+                        <div className="p-8 md:p-10">
+                            <div className="mb-8 text-center border-b pb-4 border-gray-100">
+                                <h2 className="text-3xl font-bold text-blue-900 tracking-wider">書序</h2>
+                                <p className="text-sm text-gray-500 mt-2">Bureau Director's Preface</p>
+                            </div>
+                            <div className="space-y-6 text-gray-700 leading-relaxed text-justify text-lg font-serif">
+                                <p className="indent-8">隨著時代進步與醫療科技的發展，緊急救護的標準與技術也不斷演進。院前緊急救護是守護市民生命安全的重要環節，臺南市政府消防局始終秉持「專業、精進、服務」的精神，持續提升救護品質，精進人員技能，以確保傷病患在黃金救命時間內獲得最適切的處置。</p>
+                                <p className="indent-8">本局自推動高級救護技術以來，積極培訓專業人員，至今高級救護技術員 (EMT-P) 比例已由103年的15.6%提升至18.7%，確保各分隊皆有足夠高級救護人員執行高級救命術 (ALS)，大幅提升本市院前救護的整體水準。而為了使本局救護人員能夠與時俱進、精準執行救護技術，我們特別編纂本書《到院前各級救護技術員緊急救護操作指引》，作為第一線救護人員的實務參考。</p>
+                                <p className="indent-8">本書內容由本局緊急救護教官群在醫療指導醫師的專業指導下共同編撰，依據最新的國際救護指引，結合本市救護經驗，詳盡整理各級救護技術員應具備的技能與標準操作程序，務求讓每一位救護人員皆能熟練應用，確保執勤時能提供最優質的院前急救服務。</p>
+                                <p className="indent-8">救護工作是一場與時間競賽的使命，而專業的技術與標準化的作業流程，正是守護生命最堅實的後盾。期待本書能成為各級救護技術員的實務指南，進一步提升臺南市院前緊急救護的效能，為市民帶來更安全、更完善的緊急醫療服務。</p>
+                            </div>
+                            <div className="mt-12 flex flex-col items-end gap-2 text-right">
+                                <p className="text-xl font-bold text-blue-900">臺南市政府消防局局長</p>
+                                <div className="py-2">
+                                    <img src="image_287f86.png" alt="局長李明峯簽名" className="h-20 w-auto object-contain" onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML += '<div class="text-3xl font-serif font-black tracking-widest text-gray-800 py-2 border-b-2 border-red-500">李明峯</div>'; }} />
+                                </div>
+                                <p className="text-sm text-gray-500 mt-2">中華民國114年6月</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const AuthorModal = ({ isOpen, onClose }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-blue-950/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
+                    <div className="relative z-10 w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl bg-white shadow-2xl animate-fade-in-up">
+                        <button onClick={onClose} className="absolute top-4 right-4 rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-gray-200 transition-colors"><Icon name="x" size={20} /></button>
+                        <div className="p-8">
+                            <div className="mb-6 text-center border-b pb-4 border-gray-100">
+                                <h2 className="text-2xl font-bold text-blue-900 tracking-wider">作者群</h2>
+                                <p className="text-sm text-gray-500 mt-1">Editorial Committee</p>
+                            </div>
+                            <div className="space-y-6 text-gray-700">
+                                <div><h3 className="text-lg font-bold text-gray-800 mb-2">臺南市政府消防局各級救護技術員到院前緊急救護作業參考指引</h3></div>
+                                <div className="text-sm space-y-2">
+                                    <p><span className="font-bold">出版單位：</span>臺南市政府消防局</p>
+                                    <p><span className="font-bold">召集人：</span>李明峯</p>
+                                    <p><span className="font-bold">副召集人：</span>李政昌、楊宗林、丁春能</p>
+                                    <p><span className="font-bold">總編輯：</span>臺南市政府消防局緊急醫療指導醫師暨醫療顧問團</p>
+                                </div>
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                        <h4 className="font-bold text-blue-800 mb-2 border-b border-blue-200 pb-1">主編</h4>
+                                        <p className="text-gray-700 text-sm">林毅、陳冠傑、張鴻傑、蔡長志、顏維廷、蘇士雄</p>
+                                    </div>
+                                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                        <h4 className="font-bold text-blue-800 mb-2 border-b border-blue-200 pb-1">編輯</h4>
+                                        <div className="text-sm text-gray-700 leading-relaxed">王健宇、李鎮宇、李穎勳、李致穎、李俊信、邱建銘、吳青翰、吳晨瑋、沈宥延、邱柏惟、林弘瑋、林威廷、陳信義、陳鵬文、陳怡娟、陳怡婕、陳世欽、黃振彬、黃國典、黃冠庭、蔡承翰、蘇士哲</div>
+                                    </div>
+                                    <div className="text-sm space-y-1 mt-2">
+                                        <p><span className="font-bold">地址：</span>臺南市安平區永華路二段 898 號</p>
+                                        <p><span className="font-bold">電話：</span>(06)-297-5119</p>
+                                        <p><span className="font-bold">網址：</span>119.tainan.gov.tw</p>
+                                        <p><span className="font-bold">出版日期：</span>2025 年 月 日</p>
+                                    </div>
+                                    <div className="text-center text-xs text-gray-400 mt-4"><p>臺南市政府消防局 版權所有</p><p>Copyright © 2025 Tainan City Fire Bureau.</p></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        function App() {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [expandedId, setExpandedId] = useState(null);
+            const [showPreface, setShowPreface] = useState(false);
+            const [showAuthors, setShowAuthors] = useState(false);
+
+            const filteredData = useMemo(() => {
+                if (!searchTerm) return guidelinesData;
+                const lowerTerm = searchTerm.toLowerCase();
+                return guidelinesData.filter(item => 
+                    item.title.toLowerCase().includes(lowerTerm) ||
+                    item.code.toLowerCase().includes(lowerTerm) ||
+                    item.keywords.some(k => k.toLowerCase().includes(lowerTerm)) ||
+                    (item.content && item.content.some(c => c.toLowerCase().includes(lowerTerm))) || 
+                    (item.subItems && item.subItems.some(sub => 
+                        sub.title.toLowerCase().includes(lowerTerm) || 
+                        (sub.grandChildItems && sub.grandChildItems.some(gc => gc.title.toLowerCase().includes(lowerTerm) || gc.content.some(c => c.toLowerCase().includes(lowerTerm))))
+                    ))
+                );
+            }, [searchTerm]);
+
+            const handleToggle = (id) => {
+                setExpandedId(prev => prev === id ? null : id);
+            };
+
+            return (
+                <div className="min-h-screen bg-slate-100 font-sans text-gray-900 selection:bg-blue-200">
+                    <StarOfLifeBackground />
+                    <PrefaceModal isOpen={showPreface} onClose={() => setShowPreface(false)} />
+                    <AuthorModal isOpen={showAuthors} onClose={() => setShowAuthors(false)} />
+                    <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-900 to-blue-800 text-white shadow-lg">
+                        <div className="mx-auto max-w-4xl px-4 py-3">
+                            <div className="flex flex-wrap items-center justify-between gap-y-3 gap-x-4">
+                                {/* Logo 與 標題區域 (Order 1) */}
+                                <div className="flex items-center gap-3 shrink-0 order-1">
+                                    <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white text-blue-900 shadow-md border-2 border-blue-200 overflow-hidden">
+                                        <img src="119.jpg" alt="Logo" className="w-full h-full object-cover" />
+                                    </div>
+                                    <div>
+                                        <h1 className="text-xl font-bold tracking-wide leading-none">臺南市政府消防局</h1>
+                                        <p className="text-xs text-blue-200 font-medium tracking-wider">緊急救護指引 (114年版)</p>
+                                    </div>
+                                </div>
+
+                                {/* 按鈕區域 (手機版: Order 2, 電腦版: Order 3) 
+                                    為了在手機上保持標題與按鈕並排，將其順序設為 2。
+                                    在寬螢幕(md)上，我們將其設為 3，讓搜尋框插入中間。
+                                */}
+                                <div className="flex flex-row md:flex-col items-center md:items-end gap-2 shrink-0 order-2 md:order-3 ml-auto md:ml-0">
+                                    <button onClick={() => setShowPreface(true)} className="flex items-center gap-1.5 rounded-lg bg-blue-700/50 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600/80 transition-all border border-blue-400/30 backdrop-blur-sm">
+                                        <Icon name="book-open" size={14} /><span>書序</span>
+                                    </button>
+                                    <button onClick={() => setShowAuthors(true)} className="flex items-center gap-1.5 rounded-lg bg-blue-700/50 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600/80 transition-all border border-blue-400/30 backdrop-blur-sm">
+                                        <Icon name="users" size={14} /><span>作者群</span>
+                                    </button>
+                                </div>
+
+                                {/* 搜尋框區域 (手機版: Order 3, 電腦版: Order 2) 
+                                    設為 flex-1 讓它在寬螢幕時佔據剩餘空間 (即標題右邊)。
+                                    設定 min-w-[260px] 避免縮得太小。
+                                */}
+                                <div className="relative flex-1 min-w-[100%] md:min-w-[260px] order-3 md:order-2">
+                                    <input 
+                                        type="text" 
+                                        placeholder="搜尋代碼 (C1, M7...), 症狀或關鍵字..." 
+                                        value={searchTerm} 
+                                        onChange={(e) => setSearchTerm(e.target.value)} 
+                                        className="w-full rounded-xl border-none bg-blue-950/40 py-2.5 pl-10 pr-10 text-white placeholder-blue-300/70 outline-none ring-1 ring-blue-400/30 backdrop-blur-sm focus:bg-blue-950/60 focus:ring-2 focus:ring-blue-300/50 transition-all shadow-inner text-sm" 
+                                    />
+                                    <Icon name="search" className="absolute left-3 top-2.5 h-5 w-5 text-blue-300" />
+                                    {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-2.5 rounded-full bg-blue-900/50 p-0.5 text-blue-200 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg></button>}
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    <main className="relative mx-auto max-w-3xl px-4 py-6 pb-24">
+                        <div className="mb-4 flex items-center justify-between px-1 text-sm text-gray-500 font-medium">
+                            <span>指引總數: {guidelinesData.length}</span>
+                            {searchTerm && <span className="text-blue-600">搜尋結果: {filteredData.length} 筆</span>}
+                        </div>
+                        <div className="space-y-3">
+                            {filteredData.length > 0 ? (
+                                filteredData.map(item => (
+                                    <GuidelineCard key={item.id} item={item} isExpanded={expandedId === item.id} toggleExpand={() => handleToggle(item.id)} searchTerm={searchTerm} />
+                                ))
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-16 text-center text-gray-400">
+                                    <div className="rounded-full bg-gray-200 p-4 mb-3"><Icon name="search" size={32} className="text-gray-400" /></div>
+                                    <p className="text-lg font-medium text-gray-600">找不到符合的指引</p>
+                                    <p className="text-sm mb-4">請嘗試搜尋 "CPR", "骨折", "M7" 等關鍵字</p>
+                                    <button onClick={() => setSearchTerm('')} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm">清除搜尋</button>
+                                </div>
+                            )}
+                        </div>
+                    </main>
+                    <footer className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white/90 backdrop-blur py-3 text-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                        <div className="mx-auto max-w-3xl px-4">
+                            <p className="text-xs font-bold text-gray-600">台南市政府消防局 114年緊急救護修訂指引</p>
+                            <p className="text-[10px] text-gray-400 mt-0.5">本應用程式僅供參考，實際處置請依現場情況與醫療指導醫師指示為準。</p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
