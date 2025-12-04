@@ -64,7 +64,104 @@
             }, [name]);
             return <i data-lucide={name} width={size} height={size} className={className} {...props}></i>;
         };
+            // --- 新增元件：可縮放圖片 ---
+        const ZoomableImage = ({ src, alt, className }) => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [zoomLevel, setZoomLevel] = useState(1);
 
+            const handleOpen = (e) => {
+                e.stopPropagation(); // 防止觸發折疊收合
+                setIsOpen(true);
+                setZoomLevel(1);
+                document.body.style.overflow = 'hidden'; // 鎖定背景滾動
+            };
+
+            const handleClose = (e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+                document.body.style.overflow = ''; // 解除鎖定
+            };
+
+            const handleZoomIn = (e) => {
+                e.stopPropagation();
+                setZoomLevel(prev => Math.min(prev + 0.5, 4)); // 最大放大 4 倍
+            };
+
+            const handleZoomOut = (e) => {
+                e.stopPropagation();
+                setZoomLevel(prev => Math.max(prev - 0.5, 1)); // 最小 1 倍
+            };
+
+            return (
+                <>
+                    {/* 原圖 (點擊開啟) */}
+                    <img 
+                        src={src} 
+                        alt={alt} 
+                        className={`${className} cursor-pointer hover:opacity-95 transition-opacity`}
+                        onClick={handleOpen}
+                    />
+                    
+                    {/* 全螢幕縮放遮罩 (Portal 到 body) */}
+                    {isOpen && ReactDOM.createPortal(
+                        <div 
+                            className="fixed inset-0 z-[9999] bg-black/95 flex flex-col animate-fade-in-up" 
+                            onClick={handleClose}
+                        >
+                            {/* 頂部關閉鈕 */}
+                            <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+                                <span className="text-white/90 text-sm font-medium px-2 py-1 rounded bg-black/30 backdrop-blur-md">點擊背景關閉 / 使用下方按鈕縮放</span>
+                                <button 
+                                    onClick={handleClose} 
+                                    className="pointer-events-auto bg-white/20 hover:bg-white/30 active:bg-white/40 text-white rounded-full p-2 backdrop-blur-md transition-all"
+                                >
+                                    <Icon name="x" size={28} />
+                                </button>
+                            </div>
+
+                            {/* 圖片容器 (支援原生滾動) */}
+                            <div className="flex-1 w-full h-full overflow-auto flex items-center justify-center p-2" onClick={(e) => e.stopPropagation()}>
+                                <img 
+                                    src={src} 
+                                    alt={alt}
+                                    style={{ 
+                                        width: zoomLevel === 1 ? 'auto' : `${zoomLevel * 100}%`,
+                                        maxWidth: zoomLevel === 1 ? '100%' : 'none',
+                                        maxHeight: zoomLevel === 1 ? '100%' : 'none',
+                                        transform: zoomLevel === 1 ? 'none' : 'scale(1)', // 確保重繪
+                                    }}
+                                    className="object-contain transition-all duration-200 ease-out"
+                                />
+                            </div>
+
+                            {/* 底部控制列 */}
+                            <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-6 z-50 pointer-events-none">
+                                <div className="flex gap-6 bg-white/10 backdrop-blur-xl border border-white/20 px-8 py-3 rounded-full shadow-2xl pointer-events-auto">
+                                    <button 
+                                        onClick={handleZoomOut}
+                                        className={`text-white transition-all ${zoomLevel <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 active:scale-90'}`}
+                                        disabled={zoomLevel <= 1}
+                                    >
+                                        <Icon name="minus" size={32} />
+                                    </button>
+                                    <span className="text-white font-mono text-lg font-bold min-w-[4ch] text-center pt-1 tracking-wider">
+                                        {Math.round(zoomLevel * 100)}%
+                                    </span>
+                                    <button 
+                                        onClick={handleZoomIn}
+                                        className={`text-white transition-all ${zoomLevel >= 4 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 active:scale-90'}`}
+                                        disabled={zoomLevel >= 4}
+                                    >
+                                        <Icon name="plus" size={32} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>,
+                        document.body
+                    )}
+                </>
+            );
+        };                   
         // --- 資料數據 ---
         const guidelinesData = [
             // === 壹、依據 ===
@@ -1690,4 +1787,3 @@
     </script>
 </body>
 </html>
-
