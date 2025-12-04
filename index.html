@@ -1688,6 +1688,21 @@
             const [expandedId, setExpandedId] = useState(null);
             const [showPreface, setShowPreface] = useState(false);
             const [showAuthors, setShowAuthors] = useState(false);
+            
+            // --- 新增：字體大小狀態 (預設 1 = 100%) ---
+            const [fontScale, setFontScale] = useState(1);
+
+            // --- 新增：監聽 fontScale 並調整根元素字體大小 ---
+            // Tailwind 的 text-sm, text-lg 等皆使用 rem 單位，調整 html fontSize 即可等比縮放
+            useEffect(() => {
+                const baseSize = 100; // 瀏覽器預設通常為 16px = 100%
+                document.documentElement.style.fontSize = `${baseSize * fontScale}%`;
+            }, [fontScale]);
+
+            // --- 新增：字體調整處理函式 ---
+            const handleZoomIn = () => setFontScale(prev => Math.min(prev + 0.05, 1.25)); // 最大放大至 125%
+            const handleZoomOut = () => setFontScale(prev => Math.max(prev - 0.05, 0.9));  // 最小縮小至 90%
+            const handleResetZoom = () => setFontScale(1);
 
             const filteredData = useMemo(() => {
                 if (!searchTerm) return guidelinesData;
@@ -1713,10 +1728,12 @@
                     <StarOfLifeBackground />
                     <PrefaceModal isOpen={showPreface} onClose={() => setShowPreface(false)} />
                     <AuthorModal isOpen={showAuthors} onClose={() => setShowAuthors(false)} />
+                    
+                    {/* ... (Header 區域程式碼保持不變) ... */}
                     <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-900 to-blue-800 text-white shadow-lg">
                         <div className="mx-auto max-w-4xl px-4 py-3">
-                            <div className="flex flex-wrap items-center justify-between gap-y-3 gap-x-4">
-                                {/* Logo 與 標題區域 (Order 1) */}
+                             <div className="flex flex-wrap items-center justify-between gap-y-3 gap-x-4">
+                                {/* Logo 與 標題區域 */}
                                 <div className="flex items-center gap-3 shrink-0 order-1">
                                     <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white text-blue-900 shadow-md border-2 border-blue-200 overflow-hidden">
                                         <img src="119.png" alt="Logo" className="w-full h-full object-cover" />
