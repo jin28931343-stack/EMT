@@ -493,8 +493,10 @@
                                 id: 'C6',
                                 code: 'C6',
                                 title: '「心肺功能停止」流程',
-                                image: 'C6_ohca.png',
+                                image: 'C6_ohca.png',        // 第一張圖維持 image
+                                image2:'C6_ohca1.png',      // 第二張圖請改名為 image2
                                 bottomImage: 'igel.png',
+                                bottomImage2: 'babyOHCA.png',
                                 content: [
                                     '註 1：心肺復甦術摘要表 (專業版)',
                                     '詳細 CPR 步驟請參照：臺南市政府消防局心肺復甦術摘要表 (2020 AHA Guidelines)。',
@@ -558,24 +560,12 @@
                                 code: 'M1', 
                                 title: '「意識改變」流程', 
                                 image: 'M1_consciousness.png',
+                                bottomImage:'M1_consciousness1.png',
                                 content: [
                                     '註 1：',
                                     '1. 有初級救護技術員資格以上者，皆可測量血糖。',
                                     '2. 意識不清 (GCS<14) 之病人 (含小兒) 均需量測血糖值。',
-                                    '註 2：考慮其他意識改變原因及處置：',
-                                    '1. 測體溫：是否 >41 度或 <32 度 (高/低體溫)。',
-                                    '   - 處置：頭、腋下、鼠蹊部放置冰塊 (高體溫)；鋁箔毯與棉被包裹覆蓋 (低體溫)。',
-                                    '2. 看瞳孔：',
-                                    '   - 瞳孔放大考慮顱內出血。',
-                                    '   - 瞳孔縮小考慮中毒與腦幹出血 (給氧與抬高床頭)。',
-                                    '3. 詢問病史：',
-                                    '   - 尿毒症 (有無洗腎)：給予點滴勿過多。',
-                                    '   - 癲癇 (有無抽搐)：觀察抽搐時間，持續抽搐給予氧氣。',
-                                    '   - 中風 (評估中風指標)：>4 分可以考慮送動脈取栓的醫院 (參考 M7 流程)。',
-                                    '   - 精神疾病：必要時啟動 CIT 小組。',
-                                    '4. 環境因素：',
-                                    '   - 酒精中毒 (有無飲酒)。',
-                                    '   - 電解質過低、毒藥物中毒 (有無大量勞動流汗、嘔吐、藥物包裝)。'
+                                    '註 2：考慮其他意識改變原因及處置：'
                                 ], 
                                 note: '' 
                             },
@@ -592,17 +582,24 @@
                                     '4. 發紺不能說話。',
                                     '5. 全身軟弱。',
                                     '註 2：',
-                                    '1. 輕度異物哽塞應鼓勵病人咳嗽。',
-                                    '2. 若症狀惡化成「嚴重呼吸道哽塞」，則依照嚴重呼吸道哽塞處置。',
+                                    '1. 輕度異物哽塞之病人可能會兩手掐住脖子，不斷的用力咳嗽。此時應鼓勵病人咳嗽，不干擾其咳嗽至                          異物吐出。',
+                                    '2. 病人持續無法自主咳出異物時',
+                                    ' 1).若症狀惡化成「嚴重呼吸道哽塞」，則依照嚴重呼吸道哽塞處置。',
+                                    ' 2).若持續無法咳出異物但無惡化，則應儘速送醫，送醫期間應持續監測病人是否有惡化及意識改變之情形。',
                                     '註 3：實施哈姆立克法，施救者發現病人口中有可見之異物，才可以手指或器械移除，未看到異物前不可盲目挖除。',
-                                    '註 4：執行哈姆立克後異物仍未排出，但意識仍然清醒，得重複哈姆立克法。',
+                                    '註 4：執行哈姆立克後異物仍未排出，但意識仍然清醒，得重複哈姆立克法，過程中需隨時注意病人之意識，若出現意識改變則執行 CPR。',
                                     '註 5：當異物無法排除且意識喪失時：',
-                                    '1. 立即進行胸部按壓急救 (避免放置聲門上呼吸道)。',
-                                    '2. 持續觀察口中是否出現異物並移除。',
-                                    '註 6：胸部按壓五循環或兩分鐘後如未排除異物，應儘速送醫。',
-                                    '註 7：[P] 高級救護技術員可考慮以喉頭鏡查看並以異物夾夾出，或置入氣管內管執行單側通氣 (one lung)。',
-                                    '註 8：依初級評估考慮可給予之必要處置 (NRM 給氧、BVM 正壓給氧、抽吸)。'
-                                ], 
+                                    '1. 立即進行胸部按壓急救,過程避免放置聲門上呼吸道。',
+                                    '2. 胸部按壓時應持續觀察口中是否出現異物，如有可見異物應將病人頭轉向側邊並以手指挖除異物，並                   給予通氣測試確認異物是否完全排除。',
+                                    '註 6：胸部按壓五循環或兩分鐘後如未排除異物，應儘速送醫，於後送途中應持續壓胸排除口中異物，每 2 分鐘檢查頸動脈並且監測生命徵象，若頸動脈無搏動則進入心肺停止流程。',
+                                    '註 7：',
+                                    '1.[P] 高級救護技術員可考慮以喉頭鏡查看是否有可見異物，如有則以異物夾將之夾出。',
+                                    '2.[P] 高級救護技術員可考慮經線上醫療指導置入氣管內管，如通氣有阻力，則執行單側通氣。以達到單側肺部通氣： 1). 先將氣管內管插入至刻度之最大深度，以將異物推至單側氣管。 2). 再將氣管內管拉回至正常深度(19~23 公分)，確認可達到單側通氣後給予氣管內管固定。',
+                                    '註 8：依初級評估考慮可給予之必要處置，注意勿因處置過久延誤送醫:',
+                                    '1.曾經或正在發生之呼吸道阻塞之病人，氧氣治療方式應以 NRM 為首選，給高濃度氧氣治療。',
+                                    '2. 病人若出現呼吸動力不足，則給予袋瓣式甦醒球正壓給氣，並每 2 分鐘重新評估頸動脈及呼吸。',     
+                                    '3.阻塞物疑似為液體，得執行呼吸道抽吸。',
+                                            ], 
                                 note: '' 
                             },
                             { 
@@ -1313,14 +1310,19 @@
                                                             <div className={`overflow-hidden transition-all duration-300 ${expandedGrandChildItems[grandChild.id] ? 'max-h-[10000px] opacity-100 border-t border-gray-100' : 'max-h-0 opacity-0'}`}>
                                                                 <div className="p-3 bg-slate-50 text-sm text-gray-600">
                                                                     
-                                                                    {/* 1. 圖片顯示 (移至文字上方) */}
+                                                                    {/* 1. ===圖片顯示:1=== (移至文字上方) */}
                                                                     {grandChild.image && (
                                                                         <div className="mb-4 w-full">
                                                                             <img src={grandChild.image} alt={grandChild.title} className="w-full h-auto object-contain border border-gray-200 rounded" />
                                                                         </div>
                                                                     )}
-
-                                                                    {/* 2. 文字內容顯示 */}
+                                                                     {grandChild.image2 && (
+                                                                            <div className="mb-4 w-full">
+                                                                             <img src={grandChild.image2} alt={grandChild.title} className="w-full h-auto object-contain border border-gray-200 rounded" />
+                                                                         </div>
+)}
+                                                               
+                                                                    {/* 2. */}
                                                                     {grandChild.content.length > 0 ? (
                                                                         /* 針對 C1-C6, M1-M14, T1-T7, S1-S10, 不使用 ol list-decimal，改用 div 呈現以避免重複編號 */
                                                                         <div className="space-y-2 text-justify">
@@ -1342,15 +1344,27 @@
                                                                     )}
                                                                     {/* 2.5 底部圖片顯示 (新增功能) */}
                                                                     {grandChild.bottomImage && (
-                                                                     <div className="mt-4 w-full">
+                                                                     <div className="mt-4 w-full flex justify-center"> {/* 修改A: 加入 flex justify-center 讓圖片置中 */}
                                                                       <img 
                                                                           src={grandChild.bottomImage} 
                                                                           alt={grandChild.title} 
-                                                                          className="w-full h-auto object-contain border border-gray-200 rounded" 
+                                                                          /* 修改B: 將 w-full 改為 max-w-full */
+                                                                          className="max-w-full h-auto object-contain border border-gray-200 rounded" 
                                                                                                                                                   />
                                                                           </div>
                                                                        )}
-                                                                      
+                                                                      {/* === 這裡是您要新增的第二張圖片程式碼 === */}
+                                                                      {grandChild.bottomImage2 && (
+                                                                      <div className="mt-4 w-full flex justify-center"> {/* 修改A: 加入 flex justify-center 讓圖片置中 */}
+
+                                                                       <img 
+                                                                       src={grandChild.bottomImage2} 
+                                                                       alt={grandChild.title} 
+                                                                       className="max-w-full h-auto object-contain border border-gray-200 rounded" 
+                                                                                                                                                                                                                                                                                                                                                  />
+                                                                                                                                                                            </div>
+                                                                                                                                                                      )}
+                                                                                                                                                                  {/* ======================================= */}
                                                                        {grandChild.note && (
                                                                        <div className="mt-2 text-xs text-amber-700 bg-amber-50 p-2 rounded border border-                  amber-100 flex gap-1">
 <Icon name="info" size={14} className="shrink-0 mt-0.5" />
@@ -1657,4 +1671,3 @@
     </script>
 </body>
 </html>
-
