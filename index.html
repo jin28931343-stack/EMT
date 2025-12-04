@@ -1386,7 +1386,7 @@
                                                     {/* 1.5. 顯示圖片 */}
                                                     {subItem.image && (
                                                         <div className="mt-4 w-full">
-                                                            <img src={subItem.image} alt="illustration" className="w-full h-auto object-contain border border-gray-200 rounded bg-white" />
+                                                            <ZoomableImage src={subItem.image} alt="illustration" className="w-full h-auto object-contain border border-gray-200 rounded bg-white" />
                                                         </div>
                                                     )}
 
@@ -1415,12 +1415,12 @@
                                                                     {/* 1. ===圖片顯示:1=== (移至文字上方) */}
                                                                     {grandChild.image && (
                                                                         <div className="mb-4 w-full">
-                                                                            <img src={grandChild.image} alt={grandChild.title} className="w-full h-auto object-contain border border-gray-200 rounded" />
+                                                                            <ZoomableImage src={grandChild.image} alt={grandChild.title} className="w-full h-auto object-contain border border-gray-200 rounded" />
                                                                         </div>
                                                                     )}
                                                                      {grandChild.image2 && (
                                                                             <div className="mb-4 w-full">
-                                                                             <img src={grandChild.image2} alt={grandChild.title} className="w-full h-auto object-contain border border-gray-200 rounded" />
+                                                                             <ZoomableImage src={grandChild.image2} alt={grandChild.title} className="w-full h-auto object-contain border border-gray-200 rounded" />
                                                                          </div>
 )}
                                                                
@@ -1433,7 +1433,7 @@
                                                                                const imgSrc = c.replace('IMAGE:', '');
                                                                                return (
                                                                               <div key={idx} className="w-full flex justify-center my-3">
-                                                                             <img 
+                                                                             <ZoomableImage 
                                                                                         src={imgSrc} 
                                                                                         alt="流程圖示" 
                                                                 className="max-w-full h-auto object-contain border border-gray-200 rounded" 
@@ -1461,7 +1461,7 @@
                                                                     {/* 2.5 底部圖片顯示 (新增功能) */}
                                                                     {grandChild.bottomImage && (
                                                                      <div className="mt-4 w-full flex justify-center"> {/* 修改A: 加入 flex justify-center 讓圖片置中 */}
-                                                                      <img 
+                                                                      <ZoomableImage 
                                                                           src={grandChild.bottomImage} 
                                                                           alt={grandChild.title} 
                                                                           /* 修改B: 將 w-full 改為 max-w-full */
@@ -1473,7 +1473,7 @@
                                                                       {grandChild.bottomImage2 && (
                                                                       <div className="mt-4 w-full flex justify-center"> {/* 修改A: 加入 flex justify-center 讓圖片置中 */}
 
-                                                                       <img 
+                                                                       <ZoomableImage 
                                                                        src={grandChild.bottomImage2} 
                                                                        alt={grandChild.title} 
                                                                        className="max-w-full h-auto object-contain border border-gray-200 rounded" 
