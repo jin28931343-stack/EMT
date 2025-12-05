@@ -83,63 +83,93 @@
             }, [name]);
             return <i data-lucide={name} width={size} height={size} className={className} {...props}></i>;
         };
-             // --- 新增元件：字體大小控制器 (右下角) ---
+        // --- 修改後的元件：字體大小控制器 (右側懸浮，閒置自動隱藏) ---
         const FontSizeControl = () => {
             const [fontSize, setFontSize] = useState(16); // 預設 16px
             const [isVisible, setIsVisible] = useState(false);
+            const timeoutRef = React.useRef(null);
 
             // 當 fontSize 改變時，更新 HTML 根元素的字體大小
-            // 因為 Tailwind 使用 rem 單位，這會等比例縮放所有內容
             useEffect(() => {
                 document.documentElement.style.fontSize = `${fontSize}px`;
             }, [fontSize]);
 
-            const handleIncrease = () => setFontSize(prev => Math.min(prev + 2, 24)); // 最大 24px
-            const handleDecrease = () => setFontSize(prev => Math.max(prev - 2, 14)); // 最小 14px
-            const handleReset = () => setFontSize(16);
+            // 喚醒控制器並設定自動隱藏的計時器
+            const resetTimer = React.useCallback(() => {
+                setIsVisible(true);
+                if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                // 設定 3 秒後自動消失
+                timeoutRef.current = setTimeout(() => {
+                    setIsVisible(false);
+                }, 3000);
+            }, []);
+
+            // 監聽全域事件 (滾動、點擊、觸摸)
+            useEffect(() => {
+                window.addEventListener('scroll', resetTimer);
+                window.addEventListener('click', resetTimer);
+                window.addEventListener('touchstart', resetTimer);
+                
+                resetTimer(); // 初始化時先顯示一下
+
+                return () => {
+                    window.removeEventListener('scroll', resetTimer);
+                    window.removeEventListener('click', resetTimer);
+                    window.removeEventListener('touchstart', resetTimer);
+                    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                };
+            }, [resetTimer]);
+
+            const handleIncrease = (e) => {
+                e.stopPropagation();
+                resetTimer();
+                setFontSize(prev => Math.min(prev + 2, 24));
+            };
+
+            const handleDecrease = (e) => {
+                e.stopPropagation();
+                resetTimer();
+                setFontSize(prev => Math.max(prev - 2, 14));
+            };
+
+            const handleReset = (e) => {
+                e.stopPropagation();
+                resetTimer();
+                setFontSize(16);
+            };
 
             return (
-                <div className="fixed bottom-8 right-6 z-40 flex flex-col items-end gap-3 pointer-events-none">
-                    {/* 控制面板 */}
-                    <div className={`
-                        pointer-events-auto bg-white/95 backdrop-blur shadow-2xl border border-blue-100 rounded-2xl p-3 flex flex-col items-center gap-3 transition-all duration-300 origin-bottom-right
-                        ${isVisible ? 'scale-100 opacity-100 mb-2' : 'scale-75 opacity-0 translate-y-10 pointer-events-none absolute bottom-0 right-0'}
-                    `}>
-                        <button onClick={handleIncrease} className="p-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition-all shadow-sm" aria-label="放大字體">
-                            <Icon name="plus" size={24} />
-                        </button>
-                        
-                        <div className="flex flex-col items-center gap-0.5">
-                            <span className="font-bold text-blue-900 font-mono text-lg">{Math.round((fontSize/16)*100)}%</span>
-                            <span className="text-[10px] text-slate-400 font-medium">縮放比例</span>
-                        </div>
-
-                        <button onClick={handleDecrease} className="p-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition-all shadow-sm" aria-label="縮小字體">
-                            <Icon name="minus" size={24} />
-                        </button>
-                        
-                        <div className="w-full h-px bg-slate-200 my-1"></div>
-                        
-                        <button onClick={handleReset} className="text-xs font-bold text-slate-500 hover:text-blue-600 px-2 py-1 rounded transition-colors" aria-label="重置">
-                            重置
-                        </button>
-                    </div>
-
-                    {/* 開關按鈕 (浮動按鈕) */}
+                <div className={`
+                    fixed right-2 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-4 p-2 transition-opacity duration-500 ease-in-out
+                    ${isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
+                `}>
+                    {/* 加大按鈕 (半透明背景) */}
                     <button 
-                        onClick={() => setIsVisible(!isVisible)}
-                        className={`
-                            pointer-events-auto flex items-center justify-center w-14 h-14 rounded-full shadow-xl transition-all active:scale-90 border-2 border-white/30 backdrop-blur-sm
-                            ${isVisible ? 'bg-slate-700 text-white rotate-90' : 'bg-blue-600 hover:bg-blue-700 text-white'}
-                        `}
-                        aria-label="調整字體大小"
+                        onClick={handleIncrease} 
+                        className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm active:bg-blue-600/60 transition-all"
                     >
-                        {isVisible ? <Icon name="x" size={28} /> : <Icon name="type" size={28} />}
+                        <Icon name="plus" size={24} />
+                    </button>
+                    
+                    {/* 顯示比例 (點擊重置) */}
+                    <button 
+                        onClick={handleReset}
+                        className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex flex-col items-center justify-center shadow-sm active:bg-blue-600/60 transition-all"
+                    >
+                        <span className="text-xs font-bold text-white/90">{Math.round((fontSize/16)*100)}%</span>
+                    </button>
+
+                    {/* 縮小按鈕 */}
+                    <button 
+                        onClick={handleDecrease} 
+                        className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm active:bg-blue-600/60 transition-all"
+                    >
+                        <Icon name="minus" size={24} />
                     </button>
                 </div>
             );
         };
-            // --- 新增元件：可縮放圖片 ---
+                // --- 新增元件：可縮放圖片 ---
         const ZoomableImage = ({ src, alt, className }) => {
             const [isOpen, setIsOpen] = useState(false);
             const [zoomLevel, setZoomLevel] = useState(1);
