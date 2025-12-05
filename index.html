@@ -169,15 +169,29 @@
                 </div>
             );
         };
-                // --- 新增元件：可縮放圖片 ---
+                // --- 新增元件：可縮放圖片 (修改：按鈕縮小50%、右下角、自動隱藏) ---
         const ZoomableImage = ({ src, alt, className }) => {
             const [isOpen, setIsOpen] = useState(false);
             const [zoomLevel, setZoomLevel] = useState(1);
+            // 新增控制列顯示狀態
+            const [showControls, setShowControls] = useState(true);
+            const controlsTimeoutRef = React.useRef(null);
+
+            // 喚醒控制器並設定自動隱藏
+            const resetControlsTimer = React.useCallback(() => {
+                setShowControls(true);
+                if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+                // 設定 3 秒後自動消失
+                controlsTimeoutRef.current = setTimeout(() => {
+                    setShowControls(false);
+                }, 3000);
+            }, []);
 
             const handleOpen = (e) => {
                 e.stopPropagation(); // 防止觸發折疊收合
                 setIsOpen(true);
                 setZoomLevel(1);
+                setShowControls(true);
                 document.body.style.overflow = 'hidden'; // 鎖定背景滾動
             };
 
@@ -189,12 +203,19 @@
 
             const handleZoomIn = (e) => {
                 e.stopPropagation();
+                resetControlsTimer();
                 setZoomLevel(prev => Math.min(prev + 0.5, 4)); // 最大放大 4 倍
             };
 
             const handleZoomOut = (e) => {
                 e.stopPropagation();
+                resetControlsTimer();
                 setZoomLevel(prev => Math.max(prev - 0.5, 1)); // 最小 1 倍
+            };
+
+            // 監聽互動 (滑鼠移動或觸摸) 以顯示控制列
+            const handleInteraction = () => {
+                resetControlsTimer();
             };
 
             return (
@@ -212,9 +233,11 @@
                         <div 
                             className="fixed inset-0 z-[9999] bg-black/95 flex flex-col animate-fade-in-up" 
                             onClick={handleClose}
+                            onMouseMove={handleInteraction}
+                            onTouchStart={handleInteraction}
                         >
-                            {/* 頂部關閉鈕 */}
-                            <div className="absolute top-0 left-0 right-0 p-4 flex justify-end items-center z-50 pointer-events-none">
+                            {/* 頂部關閉鈕 (也加入自動隱藏效果) */}
+                            <div className={`absolute top-0 left-0 right-0 p-4 flex justify-end items-center z-50 pointer-events-none transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
                                 <button 
                                     onClick={handleClose} 
                                     className="pointer-events-auto bg-black/20 text-white/80 hover:text-white rounded-full p-2 backdrop-blur-[2px] transition-all"
@@ -238,20 +261,23 @@
                                 />
                             </div>
 
-                            {/* 底部右側控制列 (修改處：移至右下角、垂直排列、透明背景) */}
-                            <div className="absolute bottom-8 right-6 flex flex-col gap-4 z-50 pointer-events-auto items-center">
+                            {/* 底部右側控制列 (右下角、垂直、縮小50%、自動隱藏) */}
+                            <div className={`
+                                absolute bottom-8 right-6 flex flex-col gap-2 z-50 pointer-events-auto items-center transition-opacity duration-500 ease-in-out
+                                ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+                            `}>
                                 {/* 放大 */}
                                 <button 
                                     onClick={handleZoomIn}
-                                    className={`w-12 h-12 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm transition-all ${zoomLevel >= 4 ? 'opacity-30 cursor-not-allowed' : 'active:bg-blue-600/60'}`}
+                                    className={`w-6 h-6 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm transition-all ${zoomLevel >= 4 ? 'opacity-30 cursor-not-allowed' : 'active:bg-blue-600/60'}`}
                                     disabled={zoomLevel >= 4}
                                 >
-                                    <Icon name="plus" size={24} />
+                                    <Icon name="plus" size={14} />
                                 </button>
                                 
                                 {/* 比例顯示 */}
                                 <div className="flex items-center justify-center">
-                                    <span className="text-white/90 font-mono font-bold text-sm drop-shadow-md">
+                                    <span className="text-white/90 font-mono font-bold text-[9px] drop-shadow-md">
                                         {Math.round(zoomLevel * 100)}%
                                     </span>
                                 </div>
@@ -259,10 +285,10 @@
                                 {/* 縮小 */}
                                 <button 
                                     onClick={handleZoomOut}
-                                    className={`w-12 h-12 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm transition-all ${zoomLevel <= 1 ? 'opacity-30 cursor-not-allowed' : 'active:bg-blue-600/60'}`}
+                                    className={`w-6 h-6 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm transition-all ${zoomLevel <= 1 ? 'opacity-30 cursor-not-allowed' : 'active:bg-blue-600/60'}`}
                                     disabled={zoomLevel <= 1}
                                 >
-                                    <Icon name="minus" size={24} />
+                                    <Icon name="minus" size={14} />
                                 </button>
                             </div>
                         </div>,
