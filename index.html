@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>台南EMS指引 (含搜尋自動展開)</title>
+    <title>114年臺南EMS指引 (含搜尋自動展開)</title>
     
     <!-- === PWA 手機專用設定 === -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="台南EMS">
     <meta name="theme-color" content="#1e3a8a">
-    
+    <link rel="manifest" href="manifest.json">
+
     <link rel="apple-touch-icon" href="119.png">
     <link rel="icon" type="image/png" href="119.png">
 
@@ -59,7 +60,19 @@
 </head>
 <body class="bg-slate-100 text-gray-900">
     <div id="root"></div>
-
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then((registration) => {
+                    console.log('PWA ServiceWorker registration successful with scope: ', registration.scope);
+                })
+                .catch((err) => {
+                    console.log('PWA ServiceWorker registration failed: ', err);
+                });
+        });
+    }
+</script>
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
         
