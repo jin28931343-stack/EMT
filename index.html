@@ -1396,17 +1396,14 @@
             }
         ];
 
-        // --- 元件：生命之星背景圖 (SVG) ---
+       // --- 元件：背景圖片 (修改：縮小50%並置中) ---
         const StarOfLifeBackground = () => (
-            <div className="fixed inset-0 z-0 pointer-events-none flex items-center justify-center opacity-10 overflow-hidden">
-                <svg 
-                viewBox="0 0 500 500" 
-                className="w-[80vw] h-[80vw] max-w-[500px] max-h-[500px] text-blue-700 fill-current"
-                >
-                <path d="M220,10 L280,10 L280,150 L400,80 L430,130 L310,200 L430,270 L400,320 L280,250 L280,490 L220,490 L220,350 L100,420 L70,370 L190,300 L70,230 L100,180 L220,250 Z" stroke="white" strokeWidth="10" />
-                <path d="M245,100 L245,400" stroke="white" strokeWidth="15" strokeLinecap="round" />
-                <path d="M245,380 C220,380 200,360 220,340 C260,300 280,260 245,240 C210,220 230,180 255,160" stroke="white" strokeWidth="10" fill="none" />
-                </svg>
+            <div className="fixed inset-0 z-0 pointer-events-none flex items-center justify-center opacity-20 overflow-hidden">
+                <img 
+                    src="EMT.png" 
+                    alt="背景圖" 
+                    className="w-auto h-auto object-contain" 
+                />
             </div>
         );
 
