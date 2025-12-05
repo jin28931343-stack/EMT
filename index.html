@@ -83,7 +83,7 @@
             }, [name]);
             return <i data-lucide={name} width={size} height={size} className={className} {...props}></i>;
         };
-        // --- 修改後的元件：字體大小控制器 (右側懸浮，閒置自動隱藏) ---
+ // --- 修改後的元件：字體大小控制器 (右下角懸浮，縮小50%) ---
         const FontSizeControl = () => {
             const [fontSize, setFontSize] = useState(16); // 預設 16px
             const [isVisible, setIsVisible] = useState(false);
@@ -140,31 +140,31 @@
 
             return (
                 <div className={`
-                    fixed right-2 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-4 p-2 transition-opacity duration-500 ease-in-out
+                    fixed right-2 bottom-12 z-40 flex flex-col gap-2 p-1 transition-opacity duration-500 ease-in-out
                     ${isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
                 `}>
-                    {/* 加大按鈕 (半透明背景) */}
+                    {/* 加大按鈕 (尺寸縮小為 w-6 h-6, icon size 14) */}
                     <button 
                         onClick={handleIncrease} 
-                        className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm active:bg-blue-600/60 transition-all"
+                        className="w-6 h-6 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm active:bg-blue-600/60 transition-all"
                     >
-                        <Icon name="plus" size={24} />
+                        <Icon name="plus" size={14} />
                     </button>
                     
-                    {/* 顯示比例 (點擊重置) */}
+                    {/* 顯示比例 */}
                     <button 
                         onClick={handleReset}
-                        className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex flex-col items-center justify-center shadow-sm active:bg-blue-600/60 transition-all"
+                        className="w-6 h-6 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex flex-col items-center justify-center shadow-sm active:bg-blue-600/60 transition-all"
                     >
-                        <span className="text-xs font-bold text-white/90">{Math.round((fontSize/16)*100)}%</span>
+                        <span className="text-[9px] font-bold text-white/90">{Math.round((fontSize/16)*100)}%</span>
                     </button>
 
                     {/* 縮小按鈕 */}
                     <button 
                         onClick={handleDecrease} 
-                        className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm active:bg-blue-600/60 transition-all"
+                        className="w-6 h-6 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm active:bg-blue-600/60 transition-all"
                     >
-                        <Icon name="minus" size={24} />
+                        <Icon name="minus" size={14} />
                     </button>
                 </div>
             );
@@ -214,13 +214,12 @@
                             onClick={handleClose}
                         >
                             {/* 頂部關閉鈕 */}
-                            <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
-                                <span className="text-white/90 text-sm font-medium px-2 py-1 rounded bg-black/30 backdrop-blur-md">點擊背景關閉 / 使用下方按鈕縮放</span>
+                            <div className="absolute top-0 left-0 right-0 p-4 flex justify-end items-center z-50 pointer-events-none">
                                 <button 
                                     onClick={handleClose} 
-                                    className="pointer-events-auto bg-white/20 hover:bg-white/30 active:bg-white/40 text-white rounded-full p-2 backdrop-blur-md transition-all"
+                                    className="pointer-events-auto bg-black/20 text-white/80 hover:text-white rounded-full p-2 backdrop-blur-[2px] transition-all"
                                 >
-                                    <Icon name="x" size={28} />
+                                    <Icon name="x" size={32} />
                                 </button>
                             </div>
 
@@ -239,27 +238,32 @@
                                 />
                             </div>
 
-                            {/* 底部控制列 */}
-                            <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-6 z-50 pointer-events-none">
-                                <div className="flex gap-6 bg-white/10 backdrop-blur-xl border border-white/20 px-8 py-3 rounded-full shadow-2xl pointer-events-auto">
-                                    <button 
-                                        onClick={handleZoomOut}
-                                        className={`text-white transition-all ${zoomLevel <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 active:scale-90'}`}
-                                        disabled={zoomLevel <= 1}
-                                    >
-                                        <Icon name="minus" size={32} />
-                                    </button>
-                                    <span className="text-white font-mono text-lg font-bold min-w-[4ch] text-center pt-1 tracking-wider">
+                            {/* 底部右側控制列 (修改處：移至右下角、垂直排列、透明背景) */}
+                            <div className="absolute bottom-8 right-6 flex flex-col gap-4 z-50 pointer-events-auto items-center">
+                                {/* 放大 */}
+                                <button 
+                                    onClick={handleZoomIn}
+                                    className={`w-12 h-12 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm transition-all ${zoomLevel >= 4 ? 'opacity-30 cursor-not-allowed' : 'active:bg-blue-600/60'}`}
+                                    disabled={zoomLevel >= 4}
+                                >
+                                    <Icon name="plus" size={24} />
+                                </button>
+                                
+                                {/* 比例顯示 */}
+                                <div className="flex items-center justify-center">
+                                    <span className="text-white/90 font-mono font-bold text-sm drop-shadow-md">
                                         {Math.round(zoomLevel * 100)}%
                                     </span>
-                                    <button 
-                                        onClick={handleZoomIn}
-                                        className={`text-white transition-all ${zoomLevel >= 4 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 active:scale-90'}`}
-                                        disabled={zoomLevel >= 4}
-                                    >
-                                        <Icon name="plus" size={32} />
-                                    </button>
                                 </div>
+
+                                {/* 縮小 */}
+                                <button 
+                                    onClick={handleZoomOut}
+                                    className={`w-12 h-12 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex items-center justify-center shadow-sm transition-all ${zoomLevel <= 1 ? 'opacity-30 cursor-not-allowed' : 'active:bg-blue-600/60'}`}
+                                    disabled={zoomLevel <= 1}
+                                >
+                                    <Icon name="minus" size={24} />
+                                </button>
                             </div>
                         </div>,
                         document.body
