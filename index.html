@@ -1460,13 +1460,14 @@
             if (!highlight || !text) return <>{text}</>;
 
             // 使用正則表達式分割文字，保留搜尋詞
+　　　// 修改重點：在 span 中新增了 "search-match" 這個 class，讓跳轉功能可以找到它
             const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
             
             return (
                 <>
                 {parts.map((part, i) => 
                     part.toLowerCase() === highlight.toLowerCase() ? (
-                    <span key={i} className="bg-yellow-300 text-black font-bold px-0.5 rounded-sm shadow-sm decoration-clone">
+                    <span key={i} className="search-match bg-yellow-300 text-black font-bold px-0.5 rounded-sm shadow-sm decoration-clone">
                         {part}
                     </span>
                     ) : (
@@ -1954,6 +1955,9 @@
             const [showPreface, setShowPreface] = useState(false);
             const [showAuthors, setShowAuthors] = useState(false);
             
+               // === 新增：搜尋跳轉狀態 ===
+              const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
+              const [totalMatches, setTotalMatches] = useState(0);
             // --- 新增：字體大小狀態 (預設 1 = 100%) ---
             const [fontScale, setFontScale] = useState(1);
 
@@ -1967,6 +1971,53 @@
             // --- 新增：字體調整處理函式 ---
             const handleZoomIn = () => setFontScale(prev => Math.min(prev + 0.05, 1.25)); // 最大放大至 125%
             const handleZoomOut = () => setFontScale(prev => Math.max(prev - 0.05, 0.9));  // 最小縮小至 90%
+// === 新增：監聽搜尋並計算結果數量 (延遲執行以等待內容展開) ===
+    useEffect(() => {
+        // 重置狀態
+        setCurrentMatchIndex(-1);
+        setTotalMatches(0);
+
+        if (searchTerm) {
+            // 設定 600ms 延遲，確保 React 完成渲染且 GuidelineCard 動畫展開完畢
+            const timer = setTimeout(() => {
+                const matches = document.querySelectorAll('.search-match');
+                setTotalMatches(matches.length);
+            }, 600);
+            return () => clearTimeout(timer);
+        }
+    }, [searchTerm]);
+
+ // === 新增：上下跳轉功能 ===
+    const scrollToMatch = (direction) => {
+        const matches = document.querySelectorAll('.search-match');
+        if (matches.length === 0) return;
+
+        let newIndex;
+        if (direction === 'next') {
+            newIndex = currentMatchIndex + 1;
+            if (newIndex >= matches.length) newIndex = 0; // 循環回到第一個
+        } else {
+            newIndex = currentMatchIndex - 1;
+            if (newIndex < 0) newIndex = matches.length - 1; // 循環回到最後一個
+        }
+
+        setCurrentMatchIndex(newIndex);
+
+        // 移除所有標記的焦點樣式
+        matches.forEach(m => {
+            m.style.outline = 'none';
+        });
+        // 設定當前目標的焦點樣式 (橘色外框) 並捲動
+        const target = matches[newIndex];
+        target.style.outline = '3px solid #f97316'; // 橘色醒目外框
+        target.style.outlineOffset = '2px';
+        target.style.borderRadius = '2px';
+        
+        target.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+        });
+    };
             const handleResetZoom = () => setFontScale(1);
 
             const filteredData = useMemo(() => {
@@ -2030,9 +2081,49 @@
                                         placeholder="搜尋代碼 (C1, M7...), 症狀或關鍵字..." 
                                         value={searchTerm} 
                                         onChange={(e) => setSearchTerm(e.target.value)} 
-                                        className="w-full rounded-xl border-none bg-blue-950/40 py-2.5 pl-10 pr-10 text-white placeholder-blue-300/70 outline-none ring-1 ring-blue-400/30 backdrop-blur-sm focus:bg-blue-950/60 focus:ring-2 focus:ring-blue-300/50 transition-all shadow-inner text-sm" 
-                                    />
+                                       // 修改：padding-right 改為 pr-36 以容納按鈕群
+                                className="w-full rounded-xl border-none bg-blue-950/40 py-2.5 pl-10 pr-36 text-white placeholder-blue-300/70 outline-none ring-1 ring-blue-400/30 backdrop-blur-sm focus:bg-blue-950/60 focus:ring-2 focus:ring-blue-300/50 transition-all shadow-inner text-sm" 
+                                               />
                                     <Icon name="search" className="absolute left-3 top-2.5 h-5 w-5 text-blue-300" />
+{/* === 新增：右側控制按鈕群 (計數、上下箭頭、清除) === */}
+                            <div className="absolute right-2 top-1.5 flex items-center gap-1">
+                                {searchTerm && (
+                                    <>
+                                        {/* 搜尋計數 (如 1/12) */}
+                                        <span className="text-[10px] font-mono text-blue-200 mr-1 min-w-[24px] text-center select-none">
+                                            {totalMatches > 0 ? `${currentMatchIndex + 1}/${totalMatches}` : '0'}
+                                        </span>
+
+                                        {/* 上一個按鈕 */}
+                                        <button 
+                                            onClick={() => scrollToMatch('prev')}
+                                            className="p-1.5 rounded bg-blue-800/60 hover:bg-blue-600 text-blue-100 transition-colors border border-blue-700/50"
+                                            title="上一個結果"
+                                        >
+                                            <Icon name="chevron-up" size={14} />
+                                        </button>
+
+                                        {/* 下一個按鈕 */}
+                                        <button 
+                                            onClick={() => scrollToMatch('next')}
+                                            className="p-1.5 rounded bg-blue-800/60 hover:bg-blue-600 text-blue-100 transition-colors border border-blue-700/50"
+                                            title="下一個結果"
+                                        >
+                                            <Icon name="chevron-down" size={14} />
+                                        </button>
+
+                                        {/* 清除按鈕 */}
+                                        <button 
+                                            onClick={() => setSearchTerm('')} 
+                                            className="p-1 rounded-full hover:bg-red-500/20 text-blue-300 hover:text-red-200 ml-1 transition-colors"
+                                            title="清除搜尋"
+                                        >
+                                            <Icon name="x" size={16} />
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                  
                                     {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-2.5 rounded-full bg-blue-900/50 p-0.5 text-blue-200 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg></button>}
                                 </div>
                             </div>
