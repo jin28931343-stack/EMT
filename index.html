@@ -8,7 +8,7 @@
     <!-- === PWA 手機專用設定 === -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="台南EMS">
+    <meta name="apple-mobile-web-app-title" content="臺南救護指引">
     <meta name="theme-color" content="#1e3a8a">
     <link rel="manifest" href="manifest.json">
 
@@ -2170,11 +2170,8 @@
         matches.forEach(m => {
             m.style.outline = 'none';
         });
-        // 設定當前目標的焦點樣式 (橘色外框) 並捲動
+        // 設定當前目標 (移除原本的紅色外框 style 設定) 並捲動
         const target = matches[newIndex];
-        target.style.outline = '3px solid #f97316'; // 橘色醒目外框
-        target.style.outlineOffset = '2px';
-        target.style.borderRadius = '2px';
         
         target.scrollIntoView({ 
             behavior: 'smooth', 
