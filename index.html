@@ -1809,8 +1809,7 @@
                     {
                         id: 'other-1',
                         title: '臺南市政府消防局緊急救護執行原則',
-                        bottomImage:'PIC/Radio_1.png',
-                         bottomImage2:'PIC/Radio_2.png',
+                       
                         content: [
                             '壹、目的： 為提昇緊急救護服務品質，完成到院前緊急救護任務，確保救護技術員及緊急病人之安全。',
                             '貳、緊急救護核心原則： 詳參閱本局最新「各級救護技術員到院前緊急救護作業參考指引」（下稱參考指引）',
@@ -1930,10 +1929,11 @@
                                      'IMAGE:PIC/Award.png',
                                       'IMAGE:PIC/Award_Criteria_1.png',
                                        'IMAGE:PIC/Award_Criteria_2.png',
-                                     '臺南市政府無線電消防局緊急救護無線電回報範例',
+                                     '臺南市政府消防局緊急救護無線電回報範例',
                                        
                         ], 
-                                      
+                          bottomImage:'PIC/Radio_1.png',
+                         bottomImage2:'PIC/Radio_2.png',             
                         note: ''
                     },
                     {
@@ -2649,7 +2649,10 @@
                     (item.content && item.content.some(c => c.toLowerCase().includes(lowerTerm))) || 
                     (item.subItems && item.subItems.some(sub => 
                         sub.title.toLowerCase().includes(lowerTerm) || 
-                        (sub.grandChildItems && sub.grandChildItems.some(gc => gc.title.toLowerCase().includes(lowerTerm) || gc.content.some(c => c.toLowerCase().includes(lowerTerm))))
+                      // --- 新增：檢查子項目本身的 content (修正搜尋不到「其他救護相關」內容的問題) ---
+                        (sub.content && sub.content.some(c => c.toLowerCase().includes(lowerTerm))) ||
+                        // -----------------------------------------------------------------------
+                        (sub.grandChildItems && sub.grandChildItems.some(gc => gc.title.toLowerCase().includes(lowerTerm) ||(gc.code && gc.code.toLowerCase().includes(lowerTerm)) ||  gc.content.some(c => c.toLowerCase().includes(lowerTerm))))
                     ))
                 );
             }, [searchTerm]);
