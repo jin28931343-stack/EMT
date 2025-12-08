@@ -2313,14 +2313,14 @@
                         scrollable: false,
                         content: [
                              '1.院前特殊病人跳島策略計畫 此特殊院前救護模式有兩種啟動模式。',
-　　                      '*啟動條件 1，由 EMT 在現場判定病人符合啟動跳島計畫條件，經通報勤指中心後啟動。勤指中心可視當下救護能量決定是否啟動該計畫。',
-　　                      '*啟動條件 2，則是由符合跳島計畫資格的合作醫院經醫師判定後，經 EMT 回報勤指中心後啟動。',　
+　　                      '啟動條件 1，由 EMT 在現場判定病人符合啟動跳島計畫條件，經通報勤指中心後啟動。勤指中心可視當下救護能量決定是否啟動該計畫。',
+　　                      '啟動條件 2，則是由符合跳島計畫資格的合作醫院經醫師判定後，經 EMT 回報勤指中心後啟動。',　
                              'IMAGE:PIC/Jump_land.png',
                              '註 1：資格醫院',
                              '跳島啟動資格醫院，應於每季醫療指導醫師會議上提出申請，經討論並確定執行模式後方可進行跳島策略轉診。',
                              ' ',
                              '註 2：符合本計畫啟動之現場特殊個案：',
-                             '*外傷跳島',
+                             '外傷跳島',
                              '　A. 重大外傷病人指因外傷機轉導致受傷且符合下列情況之病人：',
                              '　　1.昏迷指數<13分。',
                              '　　2.收縮壓<90mmHg。',
@@ -2346,7 +2346,7 @@
                              ' ',
                              '　　4).爆炸傷',
                               'D. 特殊病人及情況： 小孩、嬰兒、婦女懷孕超過 20 週合併以上任一受傷情形',
-                              '*內科重症跳島 內科 OHCA 經急救後，病人於現場或車上 ROSC 者；或病人到院後於極短時間急救後 ROSC(視本局救護車是否仍在醫院)。',
+                              '內科重症跳島 內科 OHCA 經急救後，病人於現場或車上 ROSC 者；或病人到院後於極短時間急救後 ROSC(視本局救護車是否仍在醫院)。',
                         ], 
                         note: ''
                     }
@@ -2489,13 +2489,18 @@
             }, [searchTerm, item]);
 
             const toggleSubItem = (subId, e) => {
-                e.stopPropagation();
-                setExpandedSubItems(prev => ({ ...prev, [subId]: !prev[subId] }));
+                e.stopPropagation(); // 已修正縮排與空白
+                // === 修改重點：改為手風琴模式 ===
+                // 判斷點擊的項目是否已開啟
+                // 若已開啟 (prev[subId])，則設為空物件 {} (即關閉所有)
+                // 若未開啟，則設為 { [subId]: true } (即只開啟這一個，並自動收起其他原本開啟的)
+                setExpandedSubItems(prev => (prev[subId] ? {} : { [subId]: true }));
             };
 
-            const toggleGrandChildItem = (grandChildId, e) => {
+                const toggleGrandChildItem = (grandChildId, e) => {
                 e.stopPropagation();
-                setExpandedGrandChildItems(prev => ({ ...prev, [grandChildId]: !prev[grandChildId] }));
+                // === 修改重點：第三層同理改為手風琴模式 ===
+                setExpandedGrandChildItems(prev => (prev[grandChildId] ? {} : { [grandChildId]: true }));
             };
 
             const getIcon = (code) => {
@@ -2596,19 +2601,7 @@
         return <div key={idx} className="h-3"></div>; // 控制空行高度
     }
 
-    // === 新增優化 3：自動偵測「註」或「警告」，轉為黃色區塊 ===
-    // 偵測格式：註1：... 或 注意：... 或 WARN:...
-    if (para.trim().match(/^(註\d*[：:]|注意[：:]|WARN[：:])/)) {
-         return (
-            <div key={idx} className="mt-2 mb-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-sm leading-relaxed flex items-start gap-2">
-                <Icon name="alert-circle" size={16} className="mt-1 shrink-0 text-amber-600" />
-                <div className="flex-1">
-                     <HighlightText text={para} highlight={searchTerm} />
-                </div>
-            </div>
-        );
-    }
-
+   
     // === 新增優化 4：自動偵測「[P]」或「*」開頭，給予特殊標記顏色 ===
     // 偵測格式：[P]... (代表高級救護員操作)
       // === 新增優化 4 (修正版)：支援行內 [P] 與 * 標籤替換 ===
@@ -3060,23 +3053,30 @@
             const [expandedId, setExpandedId] = useState(null);
             const [showPreface, setShowPreface] = useState(false);
             const [showAuthors, setShowAuthors] = useState(false);
-            
-               // === 新增：搜尋跳轉狀態 ===
+    
+ // === 新增：搜尋跳轉狀態 ===
               const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
               const [totalMatches, setTotalMatches] = useState(0);
-            // --- 新增：字體大小狀態 (預設 1 = 100%) ---
+
+//--- 修正：將 fontScale 的 useState 移至這裡 (元件頂層) ---
             const [fontScale, setFontScale] = useState(1);
 
-            // --- 新增：監聽 fontScale 並調整根元素字體大小 ---
+            // === 新增：全頁收闔功能 (清除搜尋並收起所有折疊) ===
+            const handleCollapseAll = () => {
+                setSearchTerm(''); // 清除搜尋關鍵字
+                setExpandedId(null); // 收起所有展開的項目
+ };
+   const handleZoomIn = () => setFontScale(prev => Math.min(prev + 0.05, 1.25)); // 最大放大至 125%
+   const handleZoomOut = () => setFontScale(prev => Math.max(prev - 0.05, 0.9));  // 最小縮小至 90%
+// === 新增：監聽搜尋並計算結果數量 (延遲執行以等待內容展開) ===
+    useEffect(() => {
+                  // --- 新增：監聽 fontScale 並調整根元素字體大小 ---
             // Tailwind 的 text-sm, text-lg 等皆使用 rem 單位，調整 html fontSize 即可等比縮放
-            useEffect(() => {
                 const baseSize = 100; // 瀏覽器預設通常為 16px = 100%
                 document.documentElement.style.fontSize = `${baseSize * fontScale}%`;
             }, [fontScale]);
 
-            // --- 新增：字體調整處理函式 ---
-            const handleZoomIn = () => setFontScale(prev => Math.min(prev + 0.05, 1.25)); // 最大放大至 125%
-            const handleZoomOut = () => setFontScale(prev => Math.max(prev - 0.05, 0.9));  // 最小縮小至 90%
+          
 // === 新增：監聽搜尋並計算結果數量 (延遲執行以等待內容展開) ===
     useEffect(() => {
         // 重置狀態
@@ -3092,7 +3092,7 @@
             return () => clearTimeout(timer);
         }
     }, [searchTerm]);
-
+    
  // === 新增：上下跳轉功能 ===
     const scrollToMatch = (direction) => {
         const matches = document.querySelectorAll('.search-match');
@@ -3115,12 +3115,13 @@
         });
         // 設定當前目標 (移除原本的紅色外框 style 設定) 並捲動
         const target = matches[newIndex];
-        
-        target.scrollIntoView({ 
+          if (target) {
+            target.scrollIntoView({ 
             behavior: 'smooth', 
             block: 'center' 
         });
-    };
+     }
+   };
             const handleResetZoom = () => setFontScale(1);
 
             const filteredData = useMemo(() => {
