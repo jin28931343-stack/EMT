@@ -2495,7 +2495,21 @@
         const GuidelineCard = ({ item, isExpanded, toggleExpand, searchTerm }) => {
             const [expandedSubItems, setExpandedSubItems] = useState({});
             const [expandedGrandChildItems, setExpandedGrandChildItems] = useState({});
+// --- 新增：關閉右鍵功能 ---
+            useEffect(() => {
+                // 定義禁止右鍵選單的函式
+                const handleContextMenu = (e) => {
+                    e.preventDefault();
+                };
+                
+                // 監聽全域的右鍵點擊事件 (contextmenu)
+                document.addEventListener('contextmenu', handleContextMenu);
 
+                // 清除監聽器 (當元件卸載時)
+                return () => {
+                    document.removeEventListener('contextmenu', handleContextMenu);
+                };
+            }, []);
 // 1. 新增這個函式：自動判斷要不要縮排
             const getContentClass = (text) => {
                 // 正規表示式說明：
