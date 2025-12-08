@@ -94,7 +94,7 @@
             useEffect(() => {
                 document.documentElement.style.fontSize = `${fontSize}px`;
             }, [fontSize]);
-
+           
             // 喚醒控制器並設定自動隱藏的計時器
             const resetTimer = React.useCallback(() => {
                 setIsVisible(true);
@@ -104,7 +104,8 @@
                     setIsVisible(false);
                 }, 3000);
             }, []);
-
+   
+        
             // 監聽全域事件 (滾動、點擊、觸摸)
             useEffect(() => {
                 window.addEventListener('scroll', resetTimer);
@@ -153,8 +154,7 @@
                     </button>
                     
                     {/* 顯示比例 */}
-                    <button 
-                        onClick={handleReset}
+<button onClick={handleReset}
                         className="w-6 h-6 rounded-full bg-black/20 backdrop-blur-[2px] text-white flex flex-col items-center justify-center shadow-sm active:bg-blue-600/60 transition-all"
                     >
                         <span className="text-[9px] font-bold text-white/90">{Math.round((fontSize/16)*100)}%</span>
@@ -168,6 +168,53 @@
                         <Icon name="minus" size={14} />
                     </button>
                 </div>
+            );
+        };
+        // --- 新增元件：回到最頂端按鈕 ---
+        const ScrollToTop = () => {
+            const [isVisible, setIsVisible] = useState(false);
+
+            useEffect(() => {
+                const toggleVisibility = () => {
+                    // 修改判斷邏輯：
+                    // 當 (視窗高度 + 已滾動距離) >= (文件總高度 - 緩衝值 300px)
+                    // 代表使用者已經滑到網頁最下方附近
+                    const scrolledToBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 300;
+
+                    if (scrolledToBottom) {
+                        setIsVisible(true);
+                    } else {
+                        setIsVisible(false);
+                    }
+                };
+
+                // 初始檢查與監聽
+                toggleVisibility();
+                window.addEventListener('scroll', toggleVisibility);
+                return () => window.removeEventListener('scroll', toggleVisibility);
+            }, []);
+
+            const handleScrollToTop = () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            };
+
+            return (
+                <button
+                    onClick={handleScrollToTop}
+                    className={`
+                        fixed right-3 bottom-40 z-40 
+                        w-10 h-10 rounded-full bg-blue-600/90 text-white shadow-lg backdrop-blur-[2px] 
+                        flex items-center justify-center transition-all duration-300 transform
+                        hover:bg-blue-700 active:scale-95 border border-blue-400/30
+                        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}
+                    `}
+                    title="回到最頂端"
+                >
+                    <Icon name="arrow-up" size={24} />
+                </button>
             );
         };
                 // --- 新增元件：可縮放圖片 (修改：按鈕縮小50%、右下角、自動隱藏) ---
@@ -1147,7 +1194,7 @@
                                     '註 3：',
                                     '1.若實施靜脈注射，須注意注射部位應在橫膈以上位置，避免在下肢施打。',
                                     ' 2.孕婦有休克症狀時，應將腹腔(子宮)往左側推或將右側墊高，以解除子宮壓迫下腔靜脈 導致靜脈回流不足之狀況。',
-                                   ' 3.如有產後大出血，可以考慮腹部同心圓按摩，嘗試建立靜脈輸液，[P]可考慮予以 Tranexamic Acid 治療。',
+                                   ' 3.如有產後大出血，可以考慮腹部同心圓按摩，嘗試建立靜脈輸液,可考慮予以 Tranexamic Acid 治療。',
                                      'Tranexamic Acid 的使用：[P]',
                                      '1.無法經由壓迫止血之外傷 (例如:受傷機轉為穿刺傷或高度懷疑胸腹骨盆腔內出血)。',
                                      '2.使用劑量:抽取 Tranexamic Acid(1000mg/IV drip)加入 N/S 100ml 滴注時間約 10 分鐘。',
@@ -3154,6 +3201,7 @@
 
                     {/* ↓↓↓ 請在此處補上這一行 ↓↓↓ */}
                     <FontSizeControl />
+                     <ScrollToTop />
                     {/* ↑↑↑ 補上後右下角按鈕即會出現 ↑↑↑ */}                    
 
                     {/* ... (Header 區域程式碼保持不變) ... */}
@@ -3265,7 +3313,7 @@
                 </div>
             );
         }
-
+        
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
