@@ -170,6 +170,62 @@
                 </div>
             );
         };
+// --- 新增元件：PWA 安裝觸發按鈕 ---
+        const InstallPWA = () => {
+            const [deferredPrompt, setDeferredPrompt] = useState(null);
+            const [showBtn, setShowBtn] = useState(false);
+
+            useEffect(() => {
+                const handleBeforeInstallPrompt = (e) => {
+                    // 1. 阻止 Chrome 67+ 自動顯示 mini-infobar
+                    e.preventDefault();
+                    // 2. 儲存事件以便稍後觸發
+                    setDeferredPrompt(e);
+                    // 3. 顯示安裝按鈕
+                    setShowBtn(true);
+                };
+
+                window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+                return () => {
+                    window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+                };
+            }, []);
+
+            const handleInstallClick = async () => {
+                if (!deferredPrompt) return;
+
+                // 1. 顯示安裝提示
+                deferredPrompt.prompt();
+
+                // 2. 等待使用者回應
+                const choiceResult = await deferredPrompt.userChoice;
+                
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the A2HS prompt');
+                } else {
+                    console.log('User dismissed the A2HS prompt');
+                }
+
+                // 3. 清除提示變數，按鈕隱藏
+                setDeferredPrompt(null);
+                setShowBtn(false);
+            };
+
+            // 如果瀏覽器不支援或已安裝，則不顯示
+            if (!showBtn) return null;
+
+            return (
+                <button
+                    onClick={handleInstallClick}
+                    className="fixed left-4 bottom-24 z-50 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-700 to-blue-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95 animate-fade-in-up border border-blue-400/30 backdrop-blur-sm"
+                >
+                    <Icon name="download" size={18} />
+                    <span className="text-sm font-bold tracking-wide">安裝 APP</span>
+                </button>
+            );
+        };
+
         // --- 新增元件：回到最頂端按鈕 ---
         const ScrollToTop = () => {
             const [isVisible, setIsVisible] = useState(false);
@@ -3204,6 +3260,9 @@
                      <ScrollToTop />
                     {/* ↑↑↑ 補上後右下角按鈕即會出現 ↑↑↑ */}                    
 
+                     {/* --- 在此處加入 PWA 安裝按鈕 --- */}
+                           <InstallPWA /> 
+                       
                     {/* ... (Header 區域程式碼保持不變) ... */}
                     <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-900 to-blue-800 text-white shadow-lg">
                         <div className="mx-auto max-w-4xl px-4 py-3">
