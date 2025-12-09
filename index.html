@@ -2250,7 +2250,7 @@
                         title: '救護紀錄表填寫說明',
                         type: 'text', 
                        alignment: 'left',
-                        
+                        scrollable: false,              
                         content: [
                             '1. 紙本',
                             '臺南市政府消防局救護紀錄表填寫作業原則(附件1)。',
@@ -2658,8 +2658,8 @@
                             </div>
                             {isExpanded ? <Icon name="chevron-up" className="text-orange-500 shrink-0 ml-2" /> : <Icon name="chevron-down" className="text-gray-400 shrink-0 ml-2" />}
                         </button>
-
-                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[30000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                        
+                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[99999px] opacity-100' : 'max-h-0 opacity-0'}`}>
                             <div className="border-t border-gray-100 bg-orange-50/30 p-2 md:p-4 space-y-2">
                                 {item.subItems.map((subItem) => (
                                     <div key={subItem.id} className="border border-orange-200 rounded-lg bg-white overflow-hidden">
@@ -2672,8 +2672,8 @@
                                             </div>
                                             {expandedSubItems[subItem.id] ? <Icon name="minus" size={16} className="text-orange-400" /> : <Icon name="plus" size={16} className="text-gray-400" />}
                                         </button>
-
-                                        <div className={`overflow-hidden transition-all duration-300 ${expandedSubItems[subItem.id] ? 'max-h-[20000px] opacity-100 border-t border-orange-100' : 'max-h-0 opacity-0'}`}>
+                                                                
+                                        <div className={`overflow-hidden transition-all duration-300 ${expandedSubItems[subItem.id] ? 'max-h-[99999px] opacity-100 border-t border-orange-100' : 'max-h-0 opacity-0'}`}>
                                             
                                             {/* 1. 先顯示文字內容 (Content) 與 圖片 (Image) */}
                                             {((subItem.content && subItem.content.length > 0) || subItem.image) && (
@@ -2821,9 +2821,9 @@
                                                                 {expandedGrandChildItems[grandChild.id] ? <Icon name="chevron-up" size={14} className="text-blue-500" /> : <Icon name="chevron-down" size={14} className="text-gray-400" />}
                                                             </button>
                                                             
-                                                            <div className={`overflow-hidden transition-all duration-300 ${expandedGrandChildItems[grandChild.id] ? 'max-h-[10000px] opacity-100 border-t border-gray-100' : 'max-h-0 opacity-0'}`}>
+                                                            <div className={`overflow-hidden transition-all duration-300 ${expandedGrandChildItems[grandChild.id] ? 'max-h-[50000px] opacity-100 border-t border-gray-100' : 'max-h-0 opacity-0'}`}>
                                                                 <div className="p-3 bg-slate-50 text-sm text-gray-600">
-                                                                    
+
                                                                     {/* 1. ===圖片顯示:1=== (移至文字上方) */}
                                                                     {grandChild.image && (
                                                                         <div className="mb-4 w-full">
@@ -3037,8 +3037,8 @@
                         </div>
                         {isExpanded ? <Icon name="chevron-up" className="text-blue-500 shrink-0 ml-2" /> : <Icon name="chevron-down" className="text-gray-400 shrink-0 ml-2" />}
                     </button>
-
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[1500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                    
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[100000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                         <div className="border-t border-gray-100 bg-slate-50/80 p-4">
                             {item.code === 'Law' ? (
                                 <div className="space-y-4 text-gray-700 leading-relaxed text-justify px-2">
@@ -3386,9 +3386,6 @@
     </script>
 </body>
 </html>
-
-
-
 
 
 
