@@ -1,7 +1,7 @@
 {
   "name": "114年臺南緊急救護指引",
   "short_name": "臺南EMS",
-  "start_url": "./",
+  "start_url": "./index",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#1e3a8a",
@@ -19,3 +19,4 @@
   ]
 
 }
+
